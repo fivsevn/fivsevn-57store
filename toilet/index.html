@@ -1,180 +1,164 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>57store / toilet</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>57store / toilet</title>
 
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-      font-family: monospace;
-    }
+<style>
 
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-    }
+*{
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
+}
 
-    .page {
-      position: relative;
-      width: 100%;
-      max-width: 430px;
-      height: 100dvh;
-      overflow: hidden;
-      background: #000;
-    }
+html,body{
+margin:0;
+padding:0;
+height:100%;
+overflow:hidden;
+background:#000;
+font-family:monospace;
+}
 
-    .scene-wrap {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      background: #000;
-    }
+body{
+display:flex;
+justify-content:center;
+}
 
-    .scene {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-    }
+.page{
+position:relative;
+width:100%;
+max-width:430px;
+height:100dvh;
+overflow:hidden;
+background:#000;
+}
 
-    .hint {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      z-index: 3;
-      background: rgba(0, 0, 0, 0.45);
-      color: rgba(255, 255, 255, 0.55);
-      font-size: 12px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      backdrop-filter: blur(2px);
-    }
+.scene{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+image-rendering:pixelated;
+}
 
-    .dialog {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 4;
+/* 提示 */
+.hint{
+position:absolute;
+top:12px;
+left:12px;
+background:rgba(0,0,0,0.35);
+color:rgba(255,255,255,0.7);
+padding:6px 10px;
+border-radius:8px;
+font-size:12px;
+z-index:3;
+}
 
-      background: rgba(0, 0, 0, 0.96);
-      color: #b7d46a;
+/* 对话框 */
+.dialog{
 
-      padding: 22px 24px calc(28px + env(safe-area-inset-bottom));
-      min-height: 180px;
+position:absolute;
+left:0;
+right:0;
+bottom:0;
 
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity 0.22s ease, transform 0.22s ease;
-      pointer-events: none;
-    }
+background:rgba(0,0,0,0.55);   /* 半透明 */
 
-    .dialog.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+color:#b7d46a;
 
-    .time {
-      display: block;
-      margin-bottom: 14px;
-      font-size: 28px;
-      line-height: 1;
-      letter-spacing: 2px;
-      color: #b7d46a;
-    }
+padding:22px 24px calc(30px + env(safe-area-inset-bottom));
 
-    .line {
-      font-size: 44px;
-      line-height: 1.25;
-      letter-spacing: 1px;
-      color: #b7d46a;
-      word-break: break-word;
-    }
+backdrop-filter:blur(6px);
 
-    .img-error {
-      display: none;
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-      padding: 24px;
-      color: #888;
-      background: #000;
-      white-space: pre-wrap;
-      line-height: 1.7;
-      font-size: 14px;
-    }
+z-index:4;
 
-    @media (max-width: 430px) {
-      .dialog {
-        min-height: 165px;
-        padding: 18px 20px calc(24px + env(safe-area-inset-bottom));
-      }
+}
 
-      .time {
-        font-size: 24px;
-      }
+/* 时间 */
 
-      .line {
-        font-size: 34px;
-      }
-    }
-  </style>
+.time{
+display:block;
+font-size:26px;
+margin-bottom:12px;
+letter-spacing:2px;
+}
+
+/* 文本 */
+
+.line{
+font-size:42px;
+line-height:1.25;
+}
+
+</style>
 </head>
+
 <body>
-  <main class="page" id="page">
-    <div class="scene-wrap">
-      <img
-        class="scene"
-        id="scene"
-        src="./assets/toilet-test003.png"
-        alt="toilet scene"
-      />
-      <div class="img-error" id="imgError"></div>
-    </div>
 
-    <div class="hint">点击继续</div>
+<main class="page" id="page">
 
-    <div class="dialog show" id="dialog">
-      <span class="time">5:57...</span>
-      <div class="line">先扫那坨。</div>
-    </div>
-  </main>
+<img
+class="scene"
+src="./assets/toilet-test003.png"
+alt="scene"
+/>
 
-  <script>
-    const page = document.getElementById("page");
-    const dialog = document.getElementById("dialog");
-    const scene = document.getElementById("scene");
-    const imgError = document.getElementById("imgError");
+<div class="hint">点击继续</div>
 
-    let visible = true;
+<div class="dialog">
 
-    page.addEventListener("click", () => {
-      visible = !visible;
-      dialog.classList.toggle("show", visible);
-    });
+<span class="time" id="time"></span>
 
-    scene.addEventListener("error", () => {
-      scene.style.display = "none";
-      imgError.style.display = "block";
-      imgError.textContent =
-        "图片加载失败。\n\n请检查：\n1. 路径是否正确\n2. 是否真的存在 ./assets/toilet-test003.png\n3. 文件名大小写是否一致\n4. 图片有没有成功上传到服务器";
-    });
-  </script>
+<div class="line" id="line"></div>
+
+</div>
+
+</main>
+
+<script>
+
+const script = [
+
+{time:"5:57...",text:"先扫那坨"},
+{time:"",text:"马桶塞呢..."},
+{time:"",text:"先扫那坨"}
+
+];
+
+let index=0;
+
+const timeEl=document.getElementById("time");
+const lineEl=document.getElementById("line");
+
+function render(){
+
+const s=script[index];
+
+timeEl.textContent=s.time;
+lineEl.textContent=s.text;
+
+}
+
+render();
+
+document.getElementById("page").addEventListener("click",()=>{
+
+index++;
+
+if(index>=script.length){
+
+index=0;
+
+}
+
+render();
+
+});
+
+</script>
+
 </body>
 </html>
