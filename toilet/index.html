@@ -2,72 +2,68 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>57store / toilet</title>
   <style>
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
-      background: #050505;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
       font-family: monospace;
     }
 
     body {
       display: flex;
       justify-content: center;
-      min-height: 100vh;
+      align-items: stretch;
     }
 
     .page {
+      position: relative;
       width: 100%;
       max-width: 430px;
-      min-height: 100vh;
-      background: #000;
-      position: relative;
+      height: 100dvh;
       overflow: hidden;
+      background: #000;
+    }
+
+    .scene-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .scene {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
     }
 
     .hint {
       position: absolute;
       top: 12px;
       left: 12px;
-      background: rgba(0, 0, 0, 0.55);
-      color: #9a9a9a;
-      font-size: 12px;
-      padding: 6px 8px;
-      border-radius: 6px;
       z-index: 3;
-    }
-
-    .scene-wrap {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      background: #000;
-      position: relative;
-    }
-
-    .scene {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .img-error {
-      display: none;
-      width: 100%;
-      min-height: 100vh;
-      color: #777;
-      padding: 24px;
-      font-size: 14px;
-      line-height: 1.7;
-      white-space: pre-wrap;
+      background: rgba(0, 0, 0, 0.45);
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      backdrop-filter: blur(2px);
     }
 
     .dialog {
@@ -75,39 +71,73 @@
       left: 0;
       right: 0;
       bottom: 0;
+      z-index: 4;
+
       background: rgba(0, 0, 0, 0.96);
       color: #b7d46a;
-      padding: 18px 20px 24px;
-      min-height: 140px;
+
+      padding: 22px 24px calc(28px + env(safe-area-inset-bottom));
+      min-height: 180px;
+
       opacity: 0;
-      transition: opacity 0.25s ease;
+      transform: translateY(16px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
       pointer-events: none;
-      z-index: 2;
     }
 
     .dialog.show {
       opacity: 1;
+      transform: translateY(0);
     }
 
     .time {
       display: block;
+      margin-bottom: 14px;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: 2px;
       color: #b7d46a;
-      font-size: 20px;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
     }
 
     .line {
-      font-size: 32px;
-      line-height: 1.4;
+      font-size: 44px;
+      line-height: 1.25;
       letter-spacing: 1px;
+      color: #b7d46a;
+      word-break: break-word;
+    }
+
+    .img-error {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      padding: 24px;
+      color: #888;
+      background: #000;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    @media (max-width: 430px) {
+      .dialog {
+        min-height: 165px;
+        padding: 18px 20px calc(24px + env(safe-area-inset-bottom));
+      }
+
+      .time {
+        font-size: 24px;
+      }
+
+      .line {
+        font-size: 34px;
+      }
     }
   </style>
 </head>
 <body>
   <main class="page" id="page">
-    <div class="hint">点击继续</div>
-
     <div class="scene-wrap">
       <img
         class="scene"
@@ -118,7 +148,9 @@
       <div class="img-error" id="imgError"></div>
     </div>
 
-    <div class="dialog" id="dialog">
+    <div class="hint">点击继续</div>
+
+    <div class="dialog show" id="dialog">
       <span class="time">5:57...</span>
       <div class="line">先扫那坨。</div>
     </div>
@@ -130,15 +162,11 @@
     const scene = document.getElementById("scene");
     const imgError = document.getElementById("imgError");
 
-    let hideTimer = null;
+    let visible = true;
 
     page.addEventListener("click", () => {
-      dialog.classList.add("show");
-
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => {
-        dialog.classList.remove("show");
-      }, 2000);
+      visible = !visible;
+      dialog.classList.toggle("show", visible);
     });
 
     scene.addEventListener("error", () => {
