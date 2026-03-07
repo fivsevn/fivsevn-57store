@@ -3,34 +3,38 @@
 <head>
   <meta charset=”UTF-8“ />
   <meta name=”viewport“ content=”width=device-width, initial-scale=1.0“ />
-  <title>57store toilet test</title>
+  <title>57store / toilet</title>
   <style>
     * {
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
-      background: #111;
+      padding: 0;
+      background: #050505;
       font-family: monospace;
-      display: flex;
-      justify-content: center;
-      padding: 20px 0;
     }
 
-    .phone {
-      width: 390px;
-      max-width: 100%;
-      background: #000;
+    body {
+      display: flex;
+      justify-content: center;
       min-height: 100vh;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      background: #000;
       position: relative;
       overflow: hidden;
     }
 
     .scene {
-      width: 100%;
       display: block;
-      background: #d9d9d9;
+      width: 100%;
+      height: auto;
     }
 
     .dialog {
@@ -39,11 +43,9 @@
       right: 0;
       bottom: 0;
       background: #000;
-      color: #ddd;
-      padding: 20px;
-      font-size: 28px;
-      line-height: 1.5;
-      min-height: 150px;
+      color: #d8d8d8;
+      padding: 18px 20px 24px;
+      min-height: 140px;
       opacity: 0;
       transition: opacity 0.25s ease;
       pointer-events: none;
@@ -54,33 +56,55 @@
     }
 
     .time {
-      color: #8f8f8f;
-      margin-bottom: 12px;
       display: block;
+      color: #8a8a8a;
+      font-size: 20px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .line {
+      font-size: 32px;
+      line-height: 1.4;
+      letter-spacing: 1px;
+    }
+
+    .hint {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #9a9a9a;
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
-  <div class=”phone“ id=”phone“>
+  <main class=”page“ id=”page“>
+    <div class=”hint“>tap</div>
+
     <img
       class=”scene“
-      src=”/toilet/assets/toilet-test002.png“
+      src=”./assets/toilet-test002.png“
       alt=”toilet scene“
     />
 
     <div class=”dialog“ id=”dialog“>
       <span class=”time“>5:57...</span>
-      先扫那坨。
+      <div class=”line“>先扫那坨。</div>
     </div>
-  </div>
+  </main>
 
   <script>
-    const phone = document.getElementById(”phone“);
+    const page = document.getElementById(”page“);
     const dialog = document.getElementById(”dialog“);
 
     let hideTimer = null;
 
-    phone.addEventListener(”click“, () => {
+    page.addEventListener(”click“, () => {
       dialog.classList.add(”show“);
 
       clearTimeout(hideTimer);
