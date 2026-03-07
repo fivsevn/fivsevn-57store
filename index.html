@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang=”zh-CN“>
+<head>
+  <meta charset=”UTF-8“ />
+  <meta name=”viewport“ content=”width=device-width, initial-scale=1.0“ />
+  <title>May 7 Toilet Test</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #111;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .phone {
+      width: 390px;
+      max-width: 100%;
+      background: #000;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scene {
+      width: 100%;
+      display: block;
+      background: #d9d9d9;
+    }
+
+    .dialog {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #000;
+      color: #ddd;
+      padding: 20px;
+      font-size: 28px;
+      line-height: 1.5;
+      min-height: 150px;
+
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .dialog.show {
+      opacity: 1;
+    }
+
+    .time {
+      color: #8f8f8f;
+      margin-bottom: 12px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class=”phone“ id=”phone“>
+    <img
+      class=”scene“
+      src=”https://dummyimage.com/390x640/d9d9d9/000000&text=TOILET“
+      alt=”toilet scene“
+    />
+
+    <div class=”dialog“ id=”dialog“>
+      <span class=”time“>5:57...</span>
+      先扫那坨。
+    </div>
+  </div>
+
+  <script>
+    const phone = document.getElementById(”phone“);
+    const dialog = document.getElementById(”dialog“);
+
+    let hideTimer = null;
+
+    phone.addEventListener(”click“, () => {
+      dialog.classList.add(”show“);
+
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        dialog.classList.remove(”show“);
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
