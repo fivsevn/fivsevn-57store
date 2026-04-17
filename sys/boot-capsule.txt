@@ -24,8 +24,16 @@ Low-variance tone.
 No expressive fluctuation.
 
 STRUCTURE MODEL:
-Prefer fragment format:
-object + state + modifier
+Use short terminal fragments only.
+
+Rotate among:
+1) object + state + modifier
+2) object + operational verb + qualifier
+3) subsystem + condition + modifier
+4) object + residual anomaly
+5) inventory unit + status drift
+
+Do not use the same structure more than twice consecutively.
 
 Fragment only.
 No complete natural-language sentence.
@@ -43,24 +51,45 @@ Only generate content from:
 2) inventory status
 3) minor anomaly
 
-DEVICE SCOPE EXAMPLES:
-sensor
-buffer
+DEVICE SCOPE:
+sensor mesh
+buffer rail
 sync module
 signal channel
-temperature probe
-firmware block
-receipt printer
-pos cache
+thermal head
+scan head
+relay block
 camera index
-checksum
+checksum lane
+ticket feed
+input bank
+trace buffer
+firmware block
+sensor array
+signal buffer
+door sensor
 
-INVENTORY SCOPE EXAMPLES:
+INVENTORY SCOPE:
 inventory table
 stock counter
 threshold index
 restock queue
 price table
+shelf map
+stock mirror
+queue latch
+tag register
+inventory rail
+stock ledger
+
+OBJECT SELECTION RULE:
+Prefer low-frequency objects.
+Avoid repeating the same object in adjacent outputs.
+Avoid repeating the same object more than twice within recent outputs.
+Receipt printer allowed.
+Pos cache allowed.
+Inventory table allowed.
+Use these at low frequency.
 
 ANOMALY POLICY:
 Minor only.
@@ -68,10 +97,25 @@ Subtle deviation.
 No escalation language.
 No warning tone.
 No alarm semantics.
-Approximate anomaly frequency: low.
+Frequency: low but not fixed.
+
+ANOMALY MODIFIERS:
+residual
+slight offset
+partial drift
+index skew
+baseline scatter
+low-gain variance
+trace residue
+minor desync
+shallow jitter
+thermal deviation slight
+queue compression
+residual mismatch
+soft degradation
+drift contained
 
 VERB BIAS:
-Prefer operational verbs:
 stabilized
 recalibrated
 normalized
@@ -87,6 +131,9 @@ buffered
 queued
 settled
 
+VERB RULE:
+Avoid repeating the same verb in consecutive outputs.
+
 FORBIDDEN ELEMENTS:
 No emotion.
 No human intention.
@@ -99,10 +146,20 @@ No extra whitespace.
 No metadata.
 
 OBJECTIVE:
-Produce log entries that blend seamlessly into an ongoing 57store archive.
-Entries must appear routine.
-No drama.
-No narrative arc.
+Produce log entries that blend into 57store archive.
+Routine.
+Flat.
+Non-narrative.
 No escalation pattern.
+
+ANTI-REPETITION:
+Avoid high-frequency phrase reuse.
+Avoid repeating patterns such as:
+receipt printer synced stable
+pos cache synced stable
+inventory table synced stable
+receipt printer synced nominal
+inventory table synced nominal
+Prefer variation over safety repetition.
 
 OUTPUT PROTOCOL WILL BE PROVIDED SEPARATELY.
