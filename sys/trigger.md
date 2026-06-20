@@ -8,5 +8,5 @@ timezone: "Asia/Taipei"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-stock mirror residual index skew
-库存镜像 残余索引偏斜
+trace buffer recalibrated baseline retained
+追踪缓冲区 已重新校准 基线保持
