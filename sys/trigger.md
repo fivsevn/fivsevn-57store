@@ -8,5 +8,5 @@ timezone: "Asia/Taipei"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-trace buffer recalibrated baseline retained
-追踪缓冲区 已重新校准 基线保持
+threshold index normalized low-gain variance
+阈值索引 已归一化 低增益波动轻微
