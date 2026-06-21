@@ -16,7 +16,6 @@ def env(name: str) -> str:
     value = os.environ.get(name, "").strip()
     if not value:
         raise RuntimeError(f"Missing environment variable: {name}")
-
     return value.rstrip("/") if name.endswith("URL") else value
 
 
@@ -44,32 +43,26 @@ def wp_post(endpoint: str, payload: dict):
         auth=AUTH,
         timeout=30,
     )
-
     if not response.ok:
         print(response.status_code, response.text, file=sys.stderr)
-
     response.raise_for_status()
     return response.json()
 
 
 def get_channel_id() -> str:
     channel_id = env(CHANNEL_ID_ENV)
-
     if not channel_id.startswith("UC"):
         raise RuntimeError(
             f"{TARGET_NAME}: channel id must be the UC... id only, "
             f"not a handle or URL. Current value starts with: {channel_id[:30]}"
         )
-
     return channel_id
 
 
 def get_category_id_by_slug(slug: str) -> int:
     items = wp_get("categories", {"slug": slug, "per_page": 100})
-
     if items:
         return int(items[0]["id"])
-
     raise RuntimeError(f"Category not found by slug: {slug}")
 
 
@@ -78,7 +71,6 @@ def get_latest_youtube_video(channel_id: str) -> tuple[str, str]:
         "https://www.youtube.com/feeds/videos.xml"
         f"?channel_id={channel_id}"
     )
-
     feed = feedparser.parse(feed_url)
 
     if getattr(feed, "status", None) and feed.status != 200:
@@ -102,10 +94,8 @@ def get_latest_youtube_video(channel_id: str) -> tuple[str, str]:
     if not video_id:
         link = latest.get("link", "")
         match = re.search(r"(?:v=|/shorts/)([^?&/]+)", link)
-
         if not match:
             raise RuntimeError(f"{TARGET_NAME}: could not find video id from link: {link}")
-
         video_id = match.group(1)
 
     return title, video_id
@@ -128,19 +118,17 @@ def post_already_exists(slug: str) -> bool:
             "per_page": 10,
         },
     )
-
     return bool(items)
 
 
 def make_youtube_embed_block(video_url: str) -> str:
     escaped_url = html.escape(video_url, quote=True)
-
     return f"""
-<!-- wp:embed {{"url":"{escaped_url}","type":"video","providerNameSlug":"youtube","responsive":true,"className":"wp-embed-aspect-16-9 wp-has-aspect-ratio"}} -->
-<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
-  <div class="wp-block-embed__wrapper">
-    {escaped_url}
-  </div>
+<!-- wp:embed {{"url":"{escaped_url}","type":"video","providerNameSlug":"youtube","responsive":false}} -->
+<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube">
+    <div class="wp-block-embed__wrapper">
+        {escaped_url}
+    </div>
 </figure>
 <!-- /wp:embed -->
 """.strip()
@@ -149,7 +137,6 @@ def make_youtube_embed_block(video_url: str) -> str:
 def publish_latest_video() -> None:
     channel_id = get_channel_id()
     title, video_id = get_latest_youtube_video(channel_id)
-
     video_url = make_video_url(video_id)
     slug = make_post_slug(video_id)
 
@@ -159,7 +146,6 @@ def publish_latest_video() -> None:
 
     category_id = get_category_id_by_slug(CATEGORY_SLUG)
     content = make_youtube_embed_block(video_url)
-
     payload = {
         "status": "publish",
         "title": title,
@@ -168,9 +154,7 @@ def publish_latest_video() -> None:
         "categories": [category_id],
         "format": "video",
     }
-
     post = wp_post("posts", payload)
-
     print(
         f"Published YouTube post [{TARGET_NAME}]: "
         f"{title} -> {post.get('link')} "
