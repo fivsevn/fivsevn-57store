@@ -8,5 +8,5 @@ timezone: "Etc/UTC"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-scan head aligned baseline scatter
-扫描头 已对齐 基线散布轻微
+camera index recalibrated shallow jitter
+摄像索引 已重新校准 浅层抖动
