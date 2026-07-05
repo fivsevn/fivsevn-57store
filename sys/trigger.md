@@ -8,5 +8,5 @@ timezone: "Etc/UTC"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-firmware block recalibrated residual
-固件块 已重新校准 残余轻微
+shelf map indexed residual mismatch
+货架图 已索引 残余失配轻微
