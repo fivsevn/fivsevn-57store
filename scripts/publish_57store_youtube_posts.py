@@ -6,9 +6,10 @@ import sys
 import feedparser
 import requests
 
-
 TARGET_NAME = "57store.fivsevn"
 CHANNEL_ID_ENV = "YOUTUBE_57STORE_CHANNEL_ID"
+FETCH_LIMIT_ENV = "YOUTUBE_57STORE_FETCH_LIMIT"
+DEFAULT_FETCH_LIMIT = 15
 CATEGORY_SLUG = "57storecctv"
 
 
@@ -59,6 +60,20 @@ def get_channel_id() -> str:
     return channel_id
 
 
+def get_fetch_limit() -> int:
+    raw_value = os.environ.get(FETCH_LIMIT_ENV, str(DEFAULT_FETCH_LIMIT)).strip()
+    try:
+        limit = int(raw_value)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"{FETCH_LIMIT_ENV} must be an integer, got: {raw_value!r}"
+        ) from exc
+
+    if limit < 1:
+        raise RuntimeError(f"{FETCH_LIMIT_ENV} must be at least 1")
+    return limit
+
+
 def get_category_id_by_slug(slug: str) -> int:
     items = wp_get("categories", {"slug": slug, "per_page": 100})
     if items:
@@ -66,7 +81,21 @@ def get_category_id_by_slug(slug: str) -> int:
     raise RuntimeError(f"Category not found by slug: {slug}")
 
 
-def get_latest_youtube_video(channel_id: str) -> tuple[str, str]:
+def get_video_id(entry) -> str:
+    video_id = entry.get("yt_videoid")
+    if video_id:
+        return video_id
+
+    link = entry.get("link", "")
+    match = re.search(r"(?:v=|/shorts/)([^?&/]+)", link)
+    if not match:
+        raise RuntimeError(f"{TARGET_NAME}: could not find video id from link: {link}")
+    return match.group(1)
+
+
+def get_recent_youtube_videos(
+    channel_id: str, limit: int
+) -> list[tuple[str, str]]:
     feed_url = (
         "https://www.youtube.com/feeds/videos.xml"
         f"?channel_id={channel_id}"
@@ -87,18 +116,13 @@ def get_latest_youtube_video(channel_id: str) -> tuple[str, str]:
     if not feed.entries:
         raise RuntimeError(f"{TARGET_NAME}: no YouTube videos found in feed: {feed_url}")
 
-    latest = feed.entries[0]
-    title = latest.get("title", "YouTube")
-    video_id = latest.get("yt_videoid")
+    videos: list[tuple[str, str]] = []
+    for entry in feed.entries[:limit]:
+        title = entry.get("title", "YouTube")
+        video_id = get_video_id(entry)
+        videos.append((title, video_id))
 
-    if not video_id:
-        link = latest.get("link", "")
-        match = re.search(r"(?:v=|/shorts/)([^?&/]+)", link)
-        if not match:
-            raise RuntimeError(f"{TARGET_NAME}: could not find video id from link: {link}")
-        video_id = match.group(1)
-
-    return title, video_id
+    return videos
 
 
 def make_video_url(video_id: str) -> str:
@@ -134,36 +158,53 @@ def make_youtube_embed_block(video_url: str) -> str:
 """.strip()
 
 
-def publish_latest_video() -> None:
+def publish_recent_videos() -> None:
     channel_id = get_channel_id()
-    title, video_id = get_latest_youtube_video(channel_id)
-    video_url = make_video_url(video_id)
-    slug = make_post_slug(video_id)
+    fetch_limit = get_fetch_limit()
+    videos = get_recent_youtube_videos(channel_id, fetch_limit)
 
-    if post_already_exists(slug):
-        print(f"Skip existing YouTube post [{TARGET_NAME}]: {title} ({video_url})")
-        return
+    # YouTube feed is newest-first. Publish oldest-first so the newest video
+    # is created last and remains at the top of the WordPress archive.
+    category_id: int | None = None
+    published_count = 0
+    skipped_count = 0
 
-    category_id = get_category_id_by_slug(CATEGORY_SLUG)
-    content = make_youtube_embed_block(video_url)
-    payload = {
-        "status": "publish",
-        "title": title,
-        "slug": slug,
-        "content": content,
-        "categories": [category_id],
-        "format": "video",
-    }
-    post = wp_post("posts", payload)
+    for title, video_id in reversed(videos):
+        video_url = make_video_url(video_id)
+        slug = make_post_slug(video_id)
+
+        if post_already_exists(slug):
+            skipped_count += 1
+            print(f"Skip existing YouTube post [{TARGET_NAME}]: {title} ({video_url})")
+            continue
+
+        if category_id is None:
+            category_id = get_category_id_by_slug(CATEGORY_SLUG)
+
+        payload = {
+            "status": "publish",
+            "title": title,
+            "slug": slug,
+            "content": make_youtube_embed_block(video_url),
+            "categories": [category_id],
+            "format": "video",
+        }
+        post = wp_post("posts", payload)
+        published_count += 1
+        print(
+            f"Published YouTube post [{TARGET_NAME}]: "
+            f"{title} -> {post.get('link')} "
+            f"category={CATEGORY_SLUG}"
+        )
+
     print(
-        f"Published YouTube post [{TARGET_NAME}]: "
-        f"{title} -> {post.get('link')} "
-        f"category={CATEGORY_SLUG}"
+        f"Finished [{TARGET_NAME}]: checked={len(videos)}, "
+        f"published={published_count}, skipped={skipped_count}"
     )
 
 
 def main() -> None:
-    publish_latest_video()
+    publish_recent_videos()
 
 
 if __name__ == "__main__":
