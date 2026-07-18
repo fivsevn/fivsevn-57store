@@ -8,5 +8,5 @@ timezone: "Etc/UTC"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-shelf map indexed residual mismatch
-货架图 已索引 残余失配轻微
+sensor array settled slight offset
+传感器阵列 已稳定 轻微偏移
