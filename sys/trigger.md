@@ -8,5 +8,5 @@ timezone: "Etc/UTC"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-sensor array settled slight offset
-传感器阵列 已稳定 轻微偏移
+input bank flushed trace residue
+输入库 已清理 痕迹残留轻微
