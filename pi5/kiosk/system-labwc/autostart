@@ -1,4 +1,0 @@
-# Disabled for Mirror: /usr/bin/lwrespawn /usr/bin/pcmanfm-pi &
-# Disabled for Mirror: /usr/bin/lwrespawn /usr/bin/wf-panel-pi &
-/usr/bin/kanshi &
-/usr/bin/lxsession-xdg-autostart
