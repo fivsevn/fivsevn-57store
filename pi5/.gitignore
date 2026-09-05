@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*
+config.json
+status.json
+*.db
+*.db-*
+*.sqlite*
+*.log
+*.bak
+*.tmp
+private-backup/
+.ssh/
+.cache/
+chromium-mirror/

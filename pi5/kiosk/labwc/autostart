@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Wait for 57STORE Mirror backend
+sleep 5
+
+# Restart Chromium after it exits
+(
+    while true; do
+        chromium --user-data-dir=/home/fivsevn/.config/chromium-mirror --password-store=basic             --kiosk             --noerrdialogs             --disable-infobars             --disable-session-crashed-bubble             --disable-features=Translate             http://127.0.0.1:5757
+        sleep 2
+    done
+) &

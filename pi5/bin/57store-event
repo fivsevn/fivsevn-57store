@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exec /usr/bin/python3 /opt/57store-mirror/app.py event \
+  --url http://127.0.0.1:5757 \
+  --config /var/lib/57store-mirror/config.json \
+  "$@"
