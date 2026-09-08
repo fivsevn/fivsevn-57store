@@ -8,5 +8,5 @@ timezone: "Etc/UTC"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-buffer rail verified load distribution even
-缓冲轨 已验证 负载分布均衡
+relay block state low-gain variance
+继电器块 状态 低增益波动轻微
