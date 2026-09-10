@@ -8,5 +8,5 @@ timezone: "Etc/UTC"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-relay block state low-gain variance
-继电器块 状态 低增益波动轻微
+relay block reseated partial drift
+继电器块 已重新就位 局部漂移轻微
