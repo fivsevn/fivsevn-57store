@@ -8,5 +8,5 @@ timezone: "Etc/UTC"
 # 正文写在第二个 --- 后面
 # 正文内容：第一行：英文 terminal fragment；第二行：中文对应短句。
 ---
-relay block reseated partial drift
-继电器块 已重新就位 局部漂移轻微
+signal channel throttled load variance low
+信号通道 已限流 负载波动轻微
