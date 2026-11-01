@@ -180,6 +180,11 @@ def build(root=ROOT, output=None, base_path=''):
         if kind=='cache':
             column=wrapped.select_one('.entry-content').parent
             column['class']=column.get('class',[])+['cache-column']
+        if kind in {'sys','cctv'}:
+            column=wrapped.select_one('.entry-content').parent
+            column['class']=column.get('class',[])+['store-terminal-column']
+            frame=column.parent
+            frame['class']=frame.get('class',[])+['store-terminal-frame']
         for el in wrapped.find_all():
             for attr in ('href','src','poster'):
                 if el.get(attr):el[attr]=prefixed(el[attr],base)
@@ -194,7 +199,8 @@ def build(root=ROOT, output=None, base_path=''):
         if kind=='cache':
             source=root/'site-assets/cache.js';version='?v='+digest(source)[:12] if source.exists() else ''
             script=f'<script src="{base}/site-assets/cache.js{version}" defer></script>'
-        text=f'<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#131415"><title>{html.escape(title)}</title>'+''.join(styles)+f'</head><body class="wp-embed-responsive store-{kind}">'+str(wrapped)+script+'</body></html>'
+        html_class=' class="store-terminal-root"' if kind in {'sys','cctv'} else ''
+        text=f'<!doctype html><html lang="zh-CN"{html_class}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#131415"><title>{html.escape(title)}</title>'+''.join(styles)+f'</head><body class="wp-embed-responsive store-{kind}">'+str(wrapped)+script+'</body></html>'
         target=out/route_.strip('/')/'index.html';target.parent.mkdir(parents=True,exist_ok=True);target.write_text(text)
     def paginate(page,board,number,total):
         nav=page.select_one('.wp-block-query-pagination')

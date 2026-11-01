@@ -18,3 +18,4 @@
 .wp-elements-17 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--secondary)}
 .wp-elements-18 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--secondary)}
 .wp-elements-19 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--secondary)}
+.store-sys .store-return a { text-decoration: none; }

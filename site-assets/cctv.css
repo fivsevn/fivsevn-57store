@@ -21,3 +21,4 @@
 .wp-elements-20 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--secondary)}
 .wp-elements-21 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--secondary)}
 .wp-elements-22 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--secondary)}
+.store-cctv .store-return a { text-decoration: none; }
