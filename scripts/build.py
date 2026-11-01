@@ -10,6 +10,7 @@ import json
 from pathlib import Path, PurePosixPath
 import re
 import shutil
+import subprocess
 from urllib.parse import urlsplit, urlunsplit
 from zoneinfo import ZoneInfo
 import markdown
@@ -24,6 +25,20 @@ RUNTIME_EXTENSIONS = IMAGE_EXTENSIONS | {'.html','.css','.js','.json','.woff','.
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def store_revisions(root):
+    root=Path(root).resolve()
+    def git(*args):
+        try:
+            return subprocess.run(['git','-C',str(root),*args],check=True,capture_output=True,text=True).stdout.strip()
+        except subprocess.CalledProcessError as error:
+            raise ValueError('Store statistics require a Git checkout with committed history') from error
+    if Path(git('rev-parse','--show-toplevel')).resolve()!=root:
+        raise ValueError('Store statistics must use this repository, not a parent checkout')
+    if git('rev-parse','--is-shallow-repository')=='true':
+        raise ValueError('Store statistics require complete history; run git fetch --unshallow')
+    return int(git('rev-list','--count','HEAD'))
 
 
 def base_prefix(value):
@@ -118,6 +133,7 @@ def build(root=ROOT, output=None, base_path=''):
         raise ValueError('Output overlaps a source directory')
     posts=load_posts(root)
     public={board:[p for p in values if is_published(p['meta'])] for board,values in posts.items()}
+    stats={'revisions':store_revisions(root),'receipts':sum(len(values) for values in public.values())}
     cache=json.loads((root/'cache/posts.json').read_text())
     cache.sort(key=lambda p:datetime.fromisoformat(p['published_at']))
     if out.exists():shutil.rmtree(out)
@@ -249,12 +265,17 @@ def build(root=ROOT, output=None, base_path=''):
     legacy=out/'cache/page/2/index.html';legacy.parent.mkdir(parents=True,exist_ok=True)
     destination=base+'/cache/#'+('cache-'+datetime.fromisoformat(cache[-1]['published_at']).strftime('%Y%m%d-%H%M%S') if cache else '')
     legacy.write_text('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url='+html.escape(destination,quote=True)+'"><link rel="canonical" href="'+base+'/cache/"><title>.cache</title></head><body><a href="'+html.escape(destination,quote=True)+'">.cache</a></body></html>')
-    save('/','home',template('templates/home.html'),'57store.fivsevn')
+    home=template('templates/home.html')
+    for key,unit in [('revisions','revisions'),('receipts','receipts')]:
+        slots=home.select(f'[data-store-stat="{key}"]')
+        if len(slots)!=1:raise ValueError('Homepage needs one statistic slot: '+key)
+        slots[0].string=f'{stats[key]:,} {unit}'
+    save('/','home',home,'57store.fivsevn')
     save('/fragment/','fragment',template('fragment/page.html'),'57store / fragment')
     (out/'.nojekyll').write_text('')
     if (root/'CNAME').exists():shutil.copyfile(root/'CNAME',out/'CNAME')
     files={p.relative_to(out).as_posix():digest(p) for p in sorted(out.rglob('*')) if p.is_file()}
-    receipt={'version':1,'files':files,'fingerprint':hashlib.sha256(json.dumps(files,sort_keys=True).encode()).hexdigest(),'counts':{**{b:len(v) for b,v in public.items()},'cache':len(cache)},'pages':pages,'order':orders,'base_path':base}
+    receipt={'version':1,'files':files,'fingerprint':hashlib.sha256(json.dumps(files,sort_keys=True).encode()).hexdigest(),'counts':{**{b:len(v) for b,v in public.items()},'cache':len(cache)},'store_stats':stats,'pages':pages,'order':orders,'base_path':base}
     (out/'build-receipt.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'counts':receipt['counts'],'pages':pages,'files':len(files),'output':str(out)}));return receipt
 

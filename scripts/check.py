@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 from urllib.parse import unquote, urljoin, urlsplit
 from bs4 import BeautifulSoup
-from build import ROOT, SIZES, base_prefix, digest, is_published, load_posts, render_body
+from build import ROOT, SIZES, base_prefix, digest, is_published, load_posts, render_body, store_revisions
 
 
 def check(root=ROOT, output=None, base_path=''):
@@ -21,6 +21,13 @@ def check(root=ROOT, output=None, base_path=''):
     if hashlib.sha256(json.dumps(files,sort_keys=True).encode()).hexdigest()!=receipt.get('fingerprint'):errors.append('Build receipt fingerprint is invalid')
     if receipt.get('base_path')!=base:errors.append('Build receipt base path differs')
     manifest=json.loads((root/'site-data/content.json').read_text());posts=load_posts(root)
+    stats={'revisions':store_revisions(root),'receipts':sum(is_published(p['meta']) for values in posts.values() for p in values)}
+    if receipt.get('store_stats')!=stats:errors.append('Store statistics differ from current Git history or public content')
+    home=BeautifulSoup((out/'index.html').read_text(),'html.parser')
+    for key,unit in [('revisions','revisions'),('receipts','receipts')]:
+        slots=home.select(f'[data-store-stat="{key}"]')
+        if len(slots)!=1 or slots[0].get_text(strip=True)!=f'{stats[key]:,} {unit}':
+            errors.append('Wrong homepage statistic: '+key)
     for board,retained in manifest.get('retained_posts',{}).items():
         present={p['meta']['id'] for p in posts[board]}
         if not set(retained)<=present:errors.append('Retained archive records are missing: '+board)

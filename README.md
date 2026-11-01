@@ -51,7 +51,7 @@ Source for [57store.fivsevn.com](https://57store.fivsevn.com/), a narrative exte
 | `/toilet/` | `toilet/` | Existing interactive room |
 | `/pi5/57store/system/static/` | `pi5/57store/system/static/`, sibling `data/` | Existing terminal prototype |
 
-Receipt fields, including the captured store counters, are editable in `templates/home.html`. The counters retain the original rendered values captured for this site.
+Receipt layout and labels are editable in `templates/home.html`. Two counters are calculated during every build: **STORE REVISIONS** counts all commits reachable from the checked-out Git revision, including automated publication commits; **RECEIPTS ISSUED** counts published, public SYS and CCTV entries. Cache messages, drafts and hidden entries are excluded. Statistics are generated only in the build output and require a complete Git checkout (`git fetch --unshallow` for a shallow clone). The existing push and scheduled deployments refresh both values without a visitor-tracking service.
 
 The source root `index.md`, CCTV artwork, signed shortcut, boot capsule, room assets and Raspberry Pi application remain available for their existing uses. The website homepage is built from `templates/home.html`. The static Pi prototype retains its seeded fallbacks; its Flask `/api/` services still require the separate Pi application.
 
@@ -73,7 +73,7 @@ Publication images follow the [media naming contract](https://github.com/fivsevn
 
 `Build and deploy 57store` handles main-branch pushes, scheduled CCTV discovery at minutes 7, 22, 37 and 52, and manual runs. Manual `sync_youtube` requests immediate discovery; an ordinary manual run rebuilds saved content. `Check 57store` validates pull requests and other branches.
 
-The workflow checks local helper/schema copies against spec, runs behavioral tests, imports new SYS entries, optionally synchronizes CCTV, validates both post profiles, builds a clean `_site/`, checks local links and retained content, saves generated packages without overwriting concurrent edits, deploys through Pages, and verifies public bytes against `build-receipt.json`.
+The workflow checks local helper/schema copies against spec, runs behavioral tests, imports new SYS entries, optionally synchronizes CCTV, validates both post profiles, builds a clean `_site/`, checks local links and retained content, and saves generated packages without overwriting concurrent edits. If saving or rebasing changes the committed revision, it rebuilds and verifies the final statistics before deploying through Pages. Public bytes are then verified against `build-receipt.json`.
 
 GitHub Pages uses Actions as its publishing source. `CNAME` specifies `57store.fivsevn.com`; DNS points at GitHub Pages. The verified YouTube channel is stored in `site-data/cctv.json`; an optional `YOUTUBE_57STORE_CHANNEL_ID` secret must match it. Publishing does not require WordPress credentials.
 

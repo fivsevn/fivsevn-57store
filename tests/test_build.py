@@ -3,6 +3,7 @@ from pathlib import Path
 import hashlib
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -10,7 +11,7 @@ from bs4 import BeautifulSoup
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
-from build import build,load_posts
+from build import build,load_posts,store_revisions
 from check import check
 from site_post_metadata import normalize_metadata,dump_frontmatter
 
@@ -30,6 +31,12 @@ class BuildTests(unittest.TestCase):
         for n in range(16):self.post('sys',f'sys-{n}',f'2026-06-08T18:{n:02d}:00+08:00',body=f'system message {n}\n')
         self.post('cctv','first','2026-06-08T19:00:00+08:00',body='**authored note**\n',video='AbCdEfG0001')
         self.post('cctv','second','2026-06-08T20:00:00+08:00',video='AbCdEfG0002')
+        self.git('init','-q')
+        self.git('add','.')
+        self.git('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false','commit','-qm','Initial store')
+
+    def git(self,*args):
+        return subprocess.run(['git','-C',str(self.root),*args],check=True,capture_output=True,text=True).stdout.strip()
 
     def post(self,board,ident,date,body='',video=None,status='published',visibility='public'):
         extra={'published_at':date}
@@ -63,6 +70,7 @@ class BuildTests(unittest.TestCase):
             (source.parent/'assets').mkdir();(source.parent/'assets/secret.png').write_bytes(b'PRIVATE_IMAGE')
         receipt=build(self.root);check(self.root)
         self.assertEqual(receipt['counts']['sys'],16)
+        self.assertEqual(receipt['store_stats']['receipts'],18)
         self.assertFalse((self.root/'_site/sys/hidden').exists());self.assertFalse((self.root/'_site/sys/private').exists())
         self.assertFalse(any(p.name=='secret.png' for p in (self.root/'_site').rglob('*')))
 
@@ -111,6 +119,25 @@ class BuildTests(unittest.TestCase):
     def test_source_directory_cannot_be_used_as_output(self):
         with self.assertRaisesRegex(ValueError,'source directory'):build(self.root,output=self.root/'toilet')
         self.assertTrue((self.root/'toilet/index.html').exists())
+
+    def test_store_statistics_follow_commits_and_public_entries_without_changing_on_rebuild(self):
+        first=build(self.root)
+        self.assertEqual(first['store_stats'],{'revisions':1,'receipts':18})
+        self.assertEqual(build(self.root)['fingerprint'],first['fingerprint'])
+        self.post('sys','new-receipt','2026-06-08T23:00:00+08:00',body='new receipt')
+        self.git('add','sys')
+        self.git('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false','commit','-qm','Publish receipt')
+        with self.assertRaisesRegex(ValueError,'Store statistics differ'):check(self.root)
+        final=build(self.root);check(self.root)
+        self.assertEqual(final['store_stats'],{'revisions':2,'receipts':19})
+        home=BeautifulSoup((self.root/'_site/index.html').read_text(),'html.parser')
+        self.assertEqual(home.select_one('[data-store-stat=revisions]').get_text(),'2 revisions')
+        self.assertEqual(home.select_one('[data-store-stat=receipts]').get_text(),'19 receipts')
+
+    def test_store_statistics_reject_incomplete_git_history(self):
+        clone=self.root/'shallow'
+        subprocess.run(['git','clone','--quiet','--depth','1',self.root.as_uri(),str(clone)],check=True,capture_output=True)
+        with self.assertRaisesRegex(ValueError,'complete history'):store_revisions(clone)
 
 
 if __name__=='__main__':unittest.main()

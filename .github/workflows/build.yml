@@ -76,6 +76,7 @@ jobs:
         run: python scripts/check.py --base-path "${{ steps.pages.outputs.base_path }}"
       - name: Save new packages without overwriting concurrent edits
         run: |
+          built_head=$(git rev-parse HEAD)
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           # SYS stages only new packages and its durable cursor. CCTV appends
@@ -93,8 +94,11 @@ jobs:
               node --test tests/test_cache_reveal.mjs
               python scripts/site_post_metadata.py check --site sys --root sys --schema-dir schemas
               python scripts/site_post_metadata.py check --site cctv --root cctv --schema-dir schemas
+            fi
+            if [ "$(git rev-parse HEAD)" != "$built_head" ]; then
               python scripts/build.py --base-path "${{ steps.pages.outputs.base_path }}"
               python scripts/check.py --base-path "${{ steps.pages.outputs.base_path }}"
+              built_head=$(git rev-parse HEAD)
             fi
             if git push origin HEAD:main; then
               break
