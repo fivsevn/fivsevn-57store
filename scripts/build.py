@@ -210,7 +210,7 @@ def build(root=ROOT, output=None, base_path=''):
             el=page.new_tag('a',attrs={'href':route(board,n),'class':cls})
             if aria:el['aria-label']=aria
             el.string=label;return el
-        if number>1:nav.append(link(number-1,'«','wp-block-query-pagination-previous','Previous Page'))
+        if number>1:nav.append(link(number-1,'‹','wp-block-query-pagination-previous','上一页'))
         numbers=page.new_tag('div',attrs={'class':'wp-block-query-pagination-numbers'})
         for n in range(1,total+1):
             if n==number:
@@ -218,7 +218,7 @@ def build(root=ROOT, output=None, base_path=''):
             else:el=link(n,str(n),'page-numbers')
             numbers.append(el);numbers.append('\n')
         nav.append(numbers)
-        if number<total:nav.append(link(number+1,'»','wp-block-query-pagination-next','Next Page'))
+        if number<total:nav.append(link(number+1,'›','wp-block-query-pagination-next','下一页'))
     def card(board,post,detail=False):
         page=template(f'templates/{board}-card.html');item=page.li;ident=post['meta']['id'];item['id']=ident
         time=page.select_one('time');time['datetime']=post['meta']['extra']['published_at'];time.string=post['datetime'].strftime('%Y-%m-%d %H:%M')
