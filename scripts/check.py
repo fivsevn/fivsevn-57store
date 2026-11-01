@@ -100,18 +100,17 @@ def check(root=ROOT, output=None, base_path=''):
                 video_ids=[urlsplit(frame['src']).path.rsplit('/',1)[-1] for frame in item.select('iframe[src]')]
                 if video_ids!=post['meta']['extra']['video_ids']:errors.append('Wrong video identity: '+ident)
     cache=json.loads((root/'cache/posts.json').read_text());cache.sort(key=lambda p:p['published_at']);messages=[]
-    for number in range(1,max(1,(len(cache)+9)//10)+1):
-        rel='cache/index.html' if number==1 else f'cache/page/{number}/index.html'
-        page=BeautifulSoup((out/rel).read_text(),'html.parser')
-        for item in page.select('ul.wp-block-post-template > li'):
-            time=item.select_one('time')
-            entry=item.select_one('.entry-content');revealed=entry.select_one('[data-cache-reveal-content]')
-            messages.append((time.get('datetime') if time else None,(revealed or entry).get_text(' ',strip=True)))
-            if revealed:
-                form=entry.select_one('form[data-cache-reveal]')
-                if not form or form.has_attr('action') or form.select_one('input[type=password]').has_attr('required'):
-                    errors.append('Cache reveal must accept any input without a network endpoint')
-                if not revealed.has_attr('hidden'):errors.append('Cache reply must begin concealed')
+    page=BeautifulSoup((out/'cache/index.html').read_text(),'html.parser')
+    if page.select('.wp-block-query-pagination'):errors.append('Cache must be one continuous conversation')
+    for item in page.select('ul.wp-block-post-template > li'):
+        time=item.select_one('time')
+        entry=item.select_one('.entry-content');revealed=entry.select_one('[data-cache-reveal-content]')
+        messages.append((time.get('datetime') if time else None,(revealed or entry).get_text(' ',strip=True)))
+        if revealed:
+            form=entry.select_one('form[data-cache-reveal]')
+            if not form or form.has_attr('action') or form.select_one('input[type=password]').has_attr('required'):
+                errors.append('Cache reveal must accept any input without a network endpoint')
+            if not revealed.has_attr('hidden'):errors.append('Cache reply must begin concealed')
     expected=[]
     for post in cache:
         expected.append((None if post.get('reveal') else post['published_at'],BeautifulSoup(post['body_html'],'html.parser').get_text(' ',strip=True)))

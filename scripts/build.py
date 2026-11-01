@@ -17,10 +17,9 @@ from bs4 import BeautifulSoup
 from site_post_metadata import read_frontmatter, validate_metadata, published_datetime, is_published
 
 ROOT = Path(__file__).resolve().parents[1]
-SIZES = {'sys': 15, 'cctv': 17, 'cache': 10}
+SIZES = {'sys': 15, 'cctv': 17}
 IMAGE_EXTENSIONS = {'.jpg','.jpeg','.png','.webp','.gif','.avif','.svg','.bmp','.ico','.heic','.heif','.tif','.tiff'}
 RUNTIME_EXTENSIONS = IMAGE_EXTENSIONS | {'.html','.css','.js','.json','.woff','.woff2','.ttf','.otf','.txt'}
-CACHE_REVEAL_NOTICE = 'This content is password-protected. To view it, please enter the password below.'
 
 
 def digest(path):
@@ -162,6 +161,9 @@ def build(root=ROOT, output=None, base_path=''):
         frame=(root/'templates/frame.html').read_text() if (root/'templates/frame.html').exists() else '<main>{{content}}</main>'
         if frame.count('{{content}}')!=1:raise ValueError('Frame needs one content slot')
         wrapped=BeautifulSoup(frame.replace('{{content}}',str(body)),'html.parser')
+        if kind=='cache':
+            column=wrapped.select_one('.entry-content').parent
+            column['class']=column.get('class',[])+['cache-column']
         for el in wrapped.find_all():
             for attr in ('href','src','poster'):
                 if el.get(attr):el[attr]=prefixed(el[attr],base)
@@ -223,27 +225,30 @@ def build(root=ROOT, output=None, base_path=''):
             back=page.new_tag('p',attrs={'class':'store-return','style':'font-size:10px'});a=page.new_tag('a',attrs={'href':route(board,index//SIZES[board]+1)+'#'+post['meta']['id']});a.string='◁ '+board;back.append(a)
             page.select_one('.wp-block-query').insert_before(back)
             save(f"/{board}/{post['meta']['id']}/",board,page,post['meta']['title']+' · 57store')
-    total=max(1,(len(cache)+SIZES['cache']-1)//SIZES['cache']);pages['cache']=total
-    for n in range(1,total+1):
-        page=template('cache/page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear()
-        for post in cache[(n-1)*SIZES['cache']:n*SIZES['cache']]:
-            item=template('templates/cache-card.html').li;item['id']='cache-'+datetime.fromisoformat(post['published_at']).strftime('%Y%m%d-%H%M%S')
-            time=item.select_one('time')
-            if post.get('reveal'):
-                time.parent.decompose();item['class']=item.get('class',[])+['store-reveal']
-            else:
-                time['datetime']=post['published_at'];time.string=post['published_at']
-            entry=item.select_one('.entry-content');entry.clear()
-            if post.get('reveal'):
-                target_id=item['id']+'-content';input_id=item['id']+'-input'
-                fragment=BeautifulSoup(f'<form class="post-password-form" method="dialog" data-cache-reveal="{target_id}"><p>{CACHE_REVEAL_NOTICE}</p><p><label for="{input_id}">Password: <input id="{input_id}" type="password" name="cache_code" size="20" spellcheck="false" autocomplete="off"></label> <span class="wp-block-button"><input class="wp-block-button__link wp-element-button" type="submit" value="Enter"></span></p></form><div id="{target_id}" data-cache-reveal-content hidden></div>','html.parser')
-                target=fragment.select_one('[data-cache-reveal-content]')
-                for el in list(BeautifulSoup(post['body_html'],'html.parser').contents):target.append(el)
-                for el in list(fragment.contents):entry.append(el)
-            else:
-                for el in list(BeautifulSoup(post['body_html'],'html.parser').contents):entry.append(el)
-            listing.append(item)
-        paginate(page,'cache',n,total);save(route('cache',n),'cache',page,'57store / .cache')
+    pages['cache']=1
+    page=template('cache/page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear()
+    for post in cache:
+        item=template('templates/cache-card.html').li;item['id']='cache-'+datetime.fromisoformat(post['published_at']).strftime('%Y%m%d-%H%M%S')
+        time=item.select_one('time')
+        if post.get('reveal'):
+            time.parent.decompose();item['class']=item.get('class',[])+['store-reveal']
+        else:
+            time['datetime']=post['published_at'];time.string=post['published_at']
+        entry=item.select_one('.entry-content');entry.clear()
+        if post.get('reveal'):
+            target_id=item['id']+'-content';input_id=item['id']+'-input'
+            fragment=BeautifulSoup(f'<form class="cache-access" method="dialog" data-cache-reveal="{target_id}"><label class="cache-access-label" for="{input_id}">password / 口令</label><div class="cache-access-controls"><input class="cache-access-input" id="{input_id}" type="password" name="cache_code" placeholder="••••••" spellcheck="false" autocomplete="off"><button class="cache-access-send" type="submit">发送 <span aria-hidden="true">↵</span></button></div></form><div id="{target_id}" data-cache-reveal-content aria-live="polite" hidden></div>','html.parser')
+            target=fragment.select_one('[data-cache-reveal-content]')
+            for el in list(BeautifulSoup(post['body_html'],'html.parser').contents):target.append(el)
+            for el in list(fragment.contents):entry.append(el)
+        else:
+            for el in list(BeautifulSoup(post['body_html'],'html.parser').contents):entry.append(el)
+        listing.append(item)
+    save('/cache/','cache',page,'57store / .cache')
+    # Old conversation bookmarks return to the continuous thread.
+    legacy=out/'cache/page/2/index.html';legacy.parent.mkdir(parents=True,exist_ok=True)
+    destination=base+'/cache/#'+('cache-'+datetime.fromisoformat(cache[-1]['published_at']).strftime('%Y%m%d-%H%M%S') if cache else '')
+    legacy.write_text('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url='+html.escape(destination,quote=True)+'"><link rel="canonical" href="'+base+'/cache/"><title>.cache</title></head><body><a href="'+html.escape(destination,quote=True)+'">.cache</a></body></html>')
     save('/','home',template('templates/home.html'),'57store.fivsevn')
     save('/fragment/','fragment',template('fragment/page.html'),'57store / fragment')
     (out/'.nojekyll').write_text('')

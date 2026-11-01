@@ -7,6 +7,7 @@
         if (!reply) return;
         reply.hidden = false;
         form.hidden = true;
+        reply.querySelector('a')?.focus({preventScroll: true});
       });
     });
   }

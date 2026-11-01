@@ -45,7 +45,7 @@ Source for [57store.fivsevn.com](https://57store.fivsevn.com/), a narrative exte
 |---|---|---|
 | `/` | `templates/home.html` | Night-store receipt and navigation |
 | `/fragment/` | `fragment/page.html` | Independent image page |
-| `/cache/` | `cache/page.html`, `cache/posts.json` | Ordered conversation with pagination |
+| `/cache/` | `cache/page.html`, `cache/posts.json` | Continuous conversation with an inline access prompt |
 | `/sys/` | `sys/YYYY/MM/<id>/index.md` | Terminal log; newest first |
 | `/cctv/` | `cctv/YYYY/MM/<id>/index.md` | YouTube camera feed; newest first |
 | `/toilet/` | `toilet/` | Existing interactive room |

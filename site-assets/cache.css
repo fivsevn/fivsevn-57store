@@ -20,3 +20,21 @@
 .wp-elements-19 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--contrast)}
 .wp-elements-20 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--secondary)}
 .wp-elements-21 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--contrast)}
+
+.store-cache .cache-column{width:600px;max-width:calc(100vw - 64px);min-width:0}
+.store-cache .cache-column>.entry-content,.store-cache .cache-thread{width:100%;min-width:0}
+.cache-thread>.wp-block-columns,.cache-thread li>.wp-block-columns{width:100%}
+.store-cache [hidden]{display:none!important}
+.cache-access{width:100%;margin:0;padding-bottom:15px}
+.cache-access-label{display:block;margin:0 0 9px;color:#929292;font:10px/1.4 "Courier Prime",monospace;letter-spacing:.04em}
+.cache-access-controls{display:flex;align-items:stretch;gap:8px;width:100%;min-width:0}
+.cache-access-input{box-sizing:border-box;flex:1;min-width:0;width:0;min-height:34px;padding:8px 10px;border:1px solid #414141;border-radius:5px;background:#131415;color:var(--wp--preset--color--primary);font:12px/1.4 "Courier Prime",monospace;caret-color:var(--wp--preset--color--secondary);outline:none}
+.cache-access-input::placeholder{color:#666;letter-spacing:2px;opacity:1}
+.cache-access-input:focus{border-color:var(--wp--preset--color--secondary);box-shadow:0 0 0 1px var(--wp--preset--color--secondary)}
+.cache-access-send{box-sizing:border-box;flex:none;display:flex;align-items:center;justify-content:center;gap:7px;min-height:34px;margin:0;padding:8px 12px;border:1px solid #414141;border-radius:5px;background:#1c1c1c;color:var(--wp--preset--color--secondary);font:11px/1.4 "Courier Prime",monospace;cursor:pointer}
+.cache-access-send:hover{background:#252d29;border-color:var(--wp--preset--color--secondary)}
+.cache-access-send:focus-visible,.store-cache a:focus-visible{outline:1px solid var(--wp--preset--color--secondary);outline-offset:3px}
+@media(max-width:600px){.cache-access-input{font-size:16px;min-height:40px}.cache-access-send{min-height:40px}}
+
+.store-reveal .wp-block-column:last-child>.wp-block-group>.wp-block-group{align-self:stretch;box-sizing:border-box;width:100%}
+.store-reveal .entry-content{width:100%;min-width:0;box-sizing:border-box}
