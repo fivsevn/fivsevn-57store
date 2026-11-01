@@ -1,0 +1,117 @@
+name: Build and deploy 57store
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['README.md', 'docs/**', 'cctv/*.procreate', 'sys/*.shortcut', 'sys/boot-capsule.txt']
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      sync_youtube:
+        description: Fetch new public CCTV uploads
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: 57store-pages
+  queue: max
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: fivsevn-agy/fivsevn-spec
+          ref: main
+          path: .metadata-spec
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - name: Verify shared contract copies
+        run: |
+          cmp scripts/site_post_metadata.py .metadata-spec/tools/site_post_metadata.py
+          cmp scripts/media_naming.py .metadata-spec/tools/media_naming.py
+          cmp schemas/content-metadata.schema.json .metadata-spec/content/content-metadata.schema.json
+          cmp schemas/site-post.schema.json .metadata-spec/content/site-post.schema.json
+      - name: Test source and publishing behavior
+        run: python -m unittest discover -s tests -v
+      - name: Verify Cache interaction
+        run: node --test tests/test_cache_reveal.mjs
+      - name: Import committed SYS entries
+        run: python scripts/import_sys.py --stage
+      - name: Append new verified CCTV uploads
+        if: github.event_name == 'schedule' || inputs.sync_youtube == true
+        env:
+          YOUTUBE_57STORE_CHANNEL_ID: ${{ secrets.YOUTUBE_57STORE_CHANNEL_ID }}
+        run: python scripts/sync_cctv.py
+      - name: Validate publication metadata and media
+        run: |
+          python scripts/site_post_metadata.py check --site sys --root sys --schema-dir schemas
+          python scripts/site_post_metadata.py check --site cctv --root cctv --schema-dir schemas
+          python scripts/media_naming.py check --site sys --root sys
+          python scripts/media_naming.py check --site cctv --root cctv
+          python .metadata-spec/tools/check_metadata.py --profile site-post-v1 --site sys --content-root sys --root . --schema .metadata-spec/content/content-metadata.schema.json
+          python .metadata-spec/tools/check_metadata.py --profile site-post-v1 --site cctv --content-root cctv --root . --schema .metadata-spec/content/content-metadata.schema.json
+      - id: pages
+        uses: actions/configure-pages@v5
+      - name: Build the complete site
+        run: python scripts/build.py --base-path "${{ steps.pages.outputs.base_path }}"
+      - name: Check the generated site
+        run: python scripts/check.py --base-path "${{ steps.pages.outputs.base_path }}"
+      - name: Save new packages without overwriting concurrent edits
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # SYS stages only new packages and its durable cursor. CCTV appends
+          # complete new packages without rewriting saved rooms or artwork.
+          git add -- cctv
+          if ! git diff --cached --quiet; then
+            git commit -m 'publish: Save SYS entries and verified CCTV uploads'
+          fi
+          for attempt in 1 2 3; do
+            git fetch origin main
+            previous_head=$(git rev-parse HEAD)
+            git rebase FETCH_HEAD
+            if [ "$(git rev-parse HEAD)" != "$previous_head" ]; then
+              python -m unittest discover -s tests -v
+              node --test tests/test_cache_reveal.mjs
+              python scripts/site_post_metadata.py check --site sys --root sys --schema-dir schemas
+              python scripts/site_post_metadata.py check --site cctv --root cctv --schema-dir schemas
+              python scripts/build.py --base-path "${{ steps.pages.outputs.base_path }}"
+              python scripts/check.py --base-path "${{ steps.pages.outputs.base_path }}"
+            fi
+            if git push origin HEAD:main; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              echo '::error::Main kept changing. Saved inputs remain in Git history; rerun against current main.'
+              exit 1
+            fi
+          done
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Verify this artifact still represents current main
+        run: |
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse FETCH_HEAD)"
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify all public pages and assets
+        run: python scripts/verify_live.py --url "${{ steps.deployment.outputs.page_url }}"

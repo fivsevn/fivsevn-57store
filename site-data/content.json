@@ -1,0 +1,240 @@
+{
+  "version": 1,
+  "retained_posts": {
+    "sys": [
+      "57storesys-2026-10-03-1437-ac56bf42f697",
+      "57storesys-2026-09-10-2101-ae4a0d9a82a9",
+      "57storesys-2026-09-08-1359-6d515e4f8b3c",
+      "57storesys-2026-08-04-1656-d5498997d2af",
+      "57storesys-2026-07-26-1904-e54668d0f07a",
+      "57storesys-2026-07-18-0057-bf4e71f94192",
+      "57storesys-2026-07-05-1446-3434cf1d5a6a",
+      "57storesys-2026-07-05-1445-edca7b4c920e",
+      "57storesys-2026-07-04-0612-4be4fc6378e6",
+      "57storesys-2026-06-22-2119-78d054302e48",
+      "57storesys-2026-06-21-0834-e786718f7049",
+      "57storesys-2026-06-20-1901-a45eefbddc8d",
+      "57storesys-2026-06-21-0250-5655041c6b0f",
+      "20-june-2026-0423",
+      "19-june-2026-0814",
+      "17-june-2026-0439",
+      "13-june-2026-0137",
+      "10-june-2026-1750",
+      "9-june-2026-1048",
+      "8-june-2026-1611",
+      "5-june-2026-0726",
+      "4-june-2026-1737",
+      "4-june-2026-0525",
+      "3-june-2026-0457",
+      "3-june-2026-0337",
+      "1-june-2026-0530",
+      "31-may-2026-0339",
+      "31-may-2026-0327",
+      "29-may-2026-0731",
+      "28-may-2026-0813",
+      "28-may-2026-0728",
+      "28-may-2026-0355",
+      "19-may-2026-0311",
+      "13-may-2026-0007",
+      "20-april-2026-2342",
+      "18-april-2026-0747",
+      "12-april-2026-0050",
+      "2-april-2026-1304",
+      "29-march-2026-0839",
+      "26-march-2026-1039",
+      "24-march-2026-1328",
+      "21-march-2026-0643",
+      "12-march-2026-0030",
+      "8-march-2026-0122",
+      "6-march-2026-2026",
+      "6-march-2026-0632",
+      "4-march-2026-0134",
+      "3-march-2026-1754",
+      "2-march-2026-1552",
+      "2-march-2026-0637",
+      "1-march-2026-1632",
+      "1-march-2026-1326",
+      "1-march-2026-0451",
+      "1-march-2026-0242",
+      "28-february-2026-0337",
+      "26-february-2026-1914",
+      "26-february-2026-0157",
+      "25-february-2026-1914",
+      "24-february-2026-1332",
+      "24-february-2026-0023"
+    ],
+    "cctv": [
+      "youtube-sx5zdyofnsu",
+      "youtube-njxuppyc2tu",
+      "youtube-ubdzh2-yt9e",
+      "youtube-ts9dvkbwdse",
+      "youtube-rmunc8pyb84",
+      "youtube-etynccg8tbk",
+      "youtube-jyih6eqp3xe",
+      "youtube-wcamuftobjo",
+      "youtube-u7hkqne35-u",
+      "youtube-kwe647yhfaq",
+      "youtube-rtwcc7xmt8g",
+      "youtube-c7ha1n5rsxg",
+      "youtube-yk078zqxkuu",
+      "youtube-tcrvaogospi",
+      "youtube-svrmkpead-y",
+      "youtube-iy4mexa-cnw",
+      "youtube-hgi8cblrgb4",
+      "youtube-rvk8b9ijrvq",
+      "youtube-vc-lynb0sc",
+      "youtube-muvcgvsykps",
+      "youtube-so4qouqotu8",
+      "youtube-m51-vheh9xk",
+      "youtube-6qjjb-6uvb0",
+      "youtube-gwdrqrhdmmo",
+      "youtube-tc8tuxiqlaq",
+      "youtube-l0nofwku0c8",
+      "youtube-vcauaarawlg",
+      "youtube-jur9huuxuhe",
+      "youtube-gtns-bwjrf0",
+      "youtube-mwmb5apsrdy",
+      "youtube-es-ddkycnjm",
+      "youtube-rbnzdib7p8k",
+      "youtube-v6ilz3saf9y",
+      "youtube-5zajr0u-5r8",
+      "youtube-bfv9t3qfiso",
+      "3038",
+      "3037",
+      "3036",
+      "3035",
+      "3034",
+      "3033",
+      "3032",
+      "3031",
+      "3030",
+      "3029",
+      "3028",
+      "3027",
+      "3026",
+      "3025",
+      "3024",
+      "3023",
+      "3022",
+      "3021",
+      "3020",
+      "2026-04-19-022937-96d2d2fb883a",
+      "2026-04-19-022921-f25d0dd4cc99",
+      "3019",
+      "3018",
+      "3016",
+      "3015",
+      "3010",
+      "3009",
+      "3008",
+      "3007",
+      "3006",
+      "3005",
+      "2995",
+      "2852",
+      "2758",
+      "2725",
+      "2605",
+      "2540",
+      "2536",
+      "2530"
+    ]
+  },
+  "retained_counts": {
+    "sys": 60,
+    "cctv": 74
+  },
+  "cache_messages": 11,
+  "assets": [
+    {
+      "path": "site-assets/images/avatar/avatar202511main512.png",
+      "bytes": 456896,
+      "sha256": "db45ddb01a2ee146477ecebddfdea359304bbc426202ac070a126c123bcb041a"
+    },
+    {
+      "path": "site-assets/images/avatar/avatar202511nvesvif512.png",
+      "bytes": 257435,
+      "sha256": "335acb7f4c8d3f094b9d430507b803e520faf816219bfb91ba80f3f6215b9083"
+    },
+    {
+      "path": "site-assets/images/avatar/avatar202603fragment1.webp",
+      "bytes": 880862,
+      "sha256": "510f3480e32dbb46055856aabda8a62d1d5e56581357722723e8f558fbc2ce95"
+    },
+    {
+      "path": "site-assets/images/avatar/avatar202603fragment169.webp",
+      "bytes": 526486,
+      "sha256": "6295c80cc95b4de5c80286b31af918f0a7f11791c65ef93627c4916aab7888bf"
+    },
+    {
+      "path": "site-assets/images/avatar/avatar202603fragment2.webp",
+      "bytes": 895962,
+      "sha256": "aac8de622826f1daa3048c3ce1fe677e53ea42b129c37e592203d76b7fc2a1d2"
+    },
+    {
+      "path": "site-assets/images/common/icon/discord.png",
+      "bytes": 2380,
+      "sha256": "68881624d27f391979a3c3ba1c9386dcd7b4dcbee3f38e987ea7a2c66a57ab0a"
+    },
+    {
+      "path": "site-assets/images/common/icon/facebook.png",
+      "bytes": 2050,
+      "sha256": "649bccda3971453196dab0e1d5cb67909b6874fd229c550d135f2f5cb0cb93c9"
+    },
+    {
+      "path": "site-assets/images/common/icon/instagram.png",
+      "bytes": 2578,
+      "sha256": "5a0adf27ec7abc418c3c85ef9b8b3358f583fc6756b3134bf4217fe4502cdc26"
+    },
+    {
+      "path": "site-assets/images/common/icon/mastodon.png",
+      "bytes": 2458,
+      "sha256": "9875a9863b173fff06e48f30b7776a3f736e6bca91857e6288852e191d184463"
+    },
+    {
+      "path": "site-assets/images/common/icon/pinterest.png",
+      "bytes": 2533,
+      "sha256": "2b761e7714df95eb3b74bd62b4a08f517b4aa1b68bec1859277743457750b85a"
+    },
+    {
+      "path": "site-assets/images/common/icon/reddit.png",
+      "bytes": 2534,
+      "sha256": "59f933509b112904e0c6839d6faf58d9fa2cfdf9b8b73ec289f43114b5085318"
+    },
+    {
+      "path": "site-assets/images/common/icon/threads.png",
+      "bytes": 2465,
+      "sha256": "e7a5d5d72f16c6fb517577757267d0647f2f9dd824a7ef7ea16bb076b74d5d88"
+    },
+    {
+      "path": "site-assets/images/common/icon/tiktok.png",
+      "bytes": 2220,
+      "sha256": "049184a0d54f92f7ca25571757bd13e4990a4fe60d62b075ee7fc39d67a69490"
+    },
+    {
+      "path": "site-assets/images/common/icon/tumblr.png",
+      "bytes": 2031,
+      "sha256": "3a30d116ca659bbc594309dbe17c14cd468b8e590e4bb1a4881efd1f1cf09ee4"
+    },
+    {
+      "path": "site-assets/images/common/icon/x.png",
+      "bytes": 2335,
+      "sha256": "0986347506047dd42291e0a5d0501b6f63ecae2ba59844a830e17431d1cee94f"
+    },
+    {
+      "path": "site-assets/images/common/icon/youtube.png",
+      "bytes": 2364,
+      "sha256": "dcf212114d4c48cd5ece2d80f96de7d998ff5f6cf67b983231de82b7fa3cb264"
+    },
+    {
+      "path": "site-assets/images/homepage/homepage20260607intake.webp",
+      "bytes": 752622,
+      "sha256": "f3504b42168934063f130b9882e88a7929275e5c01ea0ed5406f464ce4b1795d"
+    },
+    {
+      "path": "site-assets/images/pages/57store/57store20260224f.webp",
+      "bytes": 2735752,
+      "sha256": "dd4b5e2d9ca219673b91a5e15bf495eee68c81e13c4679db1bec899677f3e8fc"
+    }
+  ]
+}

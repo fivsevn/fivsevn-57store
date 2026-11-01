@@ -1,0 +1,51 @@
+name: Check 57store
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: fivsevn-agy/fivsevn-spec
+          ref: main
+          path: .metadata-spec
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - name: Verify shared contract copies
+        run: |
+          cmp scripts/site_post_metadata.py .metadata-spec/tools/site_post_metadata.py
+          cmp scripts/media_naming.py .metadata-spec/tools/media_naming.py
+          cmp schemas/content-metadata.schema.json .metadata-spec/content/content-metadata.schema.json
+          cmp schemas/site-post.schema.json .metadata-spec/content/site-post.schema.json
+      - run: python -m unittest discover -s tests -v
+      - name: Verify Cache interaction
+        run: node --test tests/test_cache_reveal.mjs
+      - name: Validate publication metadata and media
+        run: |
+          python scripts/site_post_metadata.py check --site sys --root sys --schema-dir schemas
+          python scripts/site_post_metadata.py check --site cctv --root cctv --schema-dir schemas
+          python scripts/media_naming.py check --site sys --root sys
+          python scripts/media_naming.py check --site cctv --root cctv
+          python .metadata-spec/tools/check_metadata.py --profile site-post-v1 --site sys --content-root sys --root . --schema .metadata-spec/content/content-metadata.schema.json
+          python .metadata-spec/tools/check_metadata.py --profile site-post-v1 --site cctv --content-root cctv --root . --schema .metadata-spec/content/content-metadata.schema.json
+      - run: python scripts/build.py
+      - run: python scripts/check.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 57store-site-preview
+          path: _site
+          include-hidden-files: true
+          retention-days: 7
