@@ -171,7 +171,15 @@ def build(root=ROOT, output=None, base_path=''):
                     if not asset.is_file():continue
                     relative=asset.relative_to(post['path'].parent).as_posix();safe_asset(post['path'].parent,relative)
                     target=out/board/post['meta']['id']/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(asset,target)
-    def template(name):return BeautifulSoup((root/name).read_text(),'html.parser')
+    def template(name):
+        source=(root/name).read_text()
+        if '{{terminal_header}}' in source:
+            source=source.replace('{{terminal_header}}',(root/'templates/terminal-header.html').read_text())
+        page=BeautifulSoup(source,'html.parser')
+        if name in {'templates/sys-page.html','templates/cctv-page.html'}:
+            board=Path(name).name.split('-')[0]
+            page.select_one(f'.store-module-select a[href="/{board}/"]')['aria-current']='page'
+        return page
     def route(board,number):return '/'+board+'/' if number==1 else f'/{board}/page/{number}/'
     def save(route_,kind,body,title):
         frame=(root/'templates/frame.html').read_text() if (root/'templates/frame.html').exists() else '<main>{{content}}</main>'
@@ -192,7 +200,7 @@ def build(root=ROOT, output=None, base_path=''):
                 el['srcset']=', '.join(prefixed(p.strip().split()[0],base)+' '+p.strip().split()[-1] for p in el['srcset'].split(','))
             if el.get('style'):el['style']=rewrite_css(el['style'],base)
         styles=[]
-        for name in ('base',kind):
+        for name in ('base','terminal' if kind in {'sys','cctv'} else kind):
             path=root/f'site-assets/{name}.css';version='?v='+digest(path)[:12] if path.exists() else ''
             styles.append(f'<link rel="stylesheet" href="{base}/site-assets/{name}.css{version}">')
         script=''
@@ -206,19 +214,18 @@ def build(root=ROOT, output=None, base_path=''):
         nav=page.select_one('.wp-block-query-pagination')
         if nav is None:raise ValueError('Missing pagination template')
         nav.clear();nav['aria-label']=board.upper()+' pages'
-        def link(n,label,cls,aria=None):
+        def link(n,label,cls,aria=None,rel=None):
             el=page.new_tag('a',attrs={'href':route(board,n),'class':cls})
             if aria:el['aria-label']=aria
+            if rel:el['rel']=rel
             el.string=label;return el
-        if number>1:nav.append(link(number-1,'‹','wp-block-query-pagination-previous','上一页'))
-        numbers=page.new_tag('div',attrs={'class':'wp-block-query-pagination-numbers'})
+        if number>1:nav.append(link(number-1,'«','wp-block-query-pagination-previous pager-arrow','上一页','prev'))
         for n in range(1,total+1):
             if n==number:
                 el=page.new_tag('span',attrs={'class':'page-numbers current','aria-current':'page'});el.string=str(n)
             else:el=link(n,str(n),'page-numbers')
-            numbers.append(el);numbers.append('\n')
-        nav.append(numbers)
-        if number<total:nav.append(link(number+1,'›','wp-block-query-pagination-next','下一页'))
+            nav.append(el)
+        if number<total:nav.append(link(number+1,'»','wp-block-query-pagination-next pager-arrow','下一页','next'))
     def card(board,post,detail=False):
         page=template(f'templates/{board}-card.html');item=page.li;ident=post['meta']['id'];item['id']=ident
         time=page.select_one('time');time['datetime']=post['meta']['extra']['published_at'];time.string=post['datetime'].strftime('%Y-%m-%d %H:%M')

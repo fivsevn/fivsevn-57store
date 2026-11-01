@@ -1,0 +1,78 @@
+/* Shared SYS/CCTV layout. Keep the original WordPress interior measurements. */
+html.store-terminal-root { scrollbar-gutter: stable both-edges; }
+.store-terminal-frame { justify-content: center; }
+.store-terminal-column { margin-inline: auto; }
+
+.wp-container-content-64d05d61 { flex-basis: 23px; }
+.wp-container-content-e1bb55cb { flex-basis: 50px; }
+.wp-container-content-ca60deed { flex-basis: 70px; }
+.wp-container-content-4daaf377 { flex-basis: 5px; }
+.wp-container-core-group-is-layout-fe9cc265 { flex-direction: column; align-items: flex-start; }
+.wp-container-core-group-is-layout-6c531013 { flex-wrap: nowrap; }
+.wp-container-core-group-is-layout-cb46ffcb { flex-wrap: nowrap; justify-content: space-between; }
+.wp-container-core-group-is-layout-fc9f69e7 { flex-wrap: nowrap; justify-content: flex-start; }
+.wp-container-core-group-is-layout-17124a9a { flex-wrap: nowrap; justify-content: flex-end; }
+.wp-container-core-group-is-layout-9e3edd55 { flex-wrap: nowrap; gap: 7px; flex-direction: column; align-items: flex-start; }
+.wp-container-core-group-is-layout-8e1b7830 > * { margin-block: 0; }
+.wp-container-core-group-is-layout-8e1b7830 > * + * { margin-block-start: 7px; }
+.wp-container-core-group-is-layout-0320f6bc { flex-wrap: nowrap; gap: 1px; }
+.wp-container-core-group-is-layout-d6758f7d > .alignfull { margin-inline: -5px; }
+.wp-container-core-group-is-layout-201a1795 > .alignfull { margin-inline: 0; }
+.wp-container-core-post-content-is-layout-9fe8ed88 > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+  max-width: 300px; margin-left: 0 !important; margin-right: auto !important;
+}
+.wp-container-core-post-content-is-layout-731c369d > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+  max-width: 300px; margin-inline: auto !important;
+}
+:is(.wp-container-core-post-content-is-layout-9fe8ed88, .wp-container-core-post-content-is-layout-731c369d) > .alignwide { max-width: 300px; }
+:is(.wp-container-core-post-content-is-layout-9fe8ed88, .wp-container-core-post-content-is-layout-731c369d) .alignfull { max-width: none; }
+
+/* The theme's 1px grey rule was missing from the migration. */
+.store-terminal .wp-block-separator {
+  border-color: currentColor;
+  border-width: 0 0 1px;
+  border-style: solid;
+  color: var(--wp--preset--color--contrast);
+}
+.store-terminal .has-contrast-color a { color: inherit; }
+.store-return a { text-decoration: none; }
+
+/* Natural text rows: 13px line height and the original .67rem block gap. */
+.store-module-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--style--block-gap);
+}
+.store-module-row,
+.store-module-select {
+  display: flex;
+  align-items: center;
+  gap: var(--wp--style--block-gap);
+}
+.store-module-row {
+  flex-wrap: wrap;
+  color: var(--wp--preset--color--primary);
+  text-decoration: none;
+}
+.store-module-select { flex-wrap: nowrap; color: var(--wp--preset--color--primary); }
+.store-module-select a { color: var(--wp--preset--color--contrast); }
+.store-module-select a[aria-current="page"] { color: var(--wp--preset--color--secondary); }
+.store-module-row:hover { text-decoration: underline; }
+.store-module-nav a:focus-visible,
+.wp-block-query-pagination a:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
+
+/* Match fieldlog: centered text links, .67rem gaps, plain double arrows. */
+.store-terminal .wp-block-query-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .67rem;
+  margin: 20px 0;
+}
+.wp-block-query-pagination a,
+.wp-block-query-pagination a:visited,
+.wp-block-query-pagination [aria-current] { color: #fff; }
+.wp-block-query-pagination a { text-decoration: underline; text-underline-offset: 1px; }
+.wp-block-query-pagination .pager-arrow { text-decoration: none; }
+.wp-block-query-pagination a:hover { text-decoration: none; }

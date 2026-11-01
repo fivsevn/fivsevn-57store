@@ -81,6 +81,81 @@ class BuildTests(unittest.TestCase):
         self.assertTrue(all(link['href'].startswith('/preview/') for link in page.select('link[rel=stylesheet]')))
         self.assertIn('/preview/pi5/57store/system/static/style.css',(self.root/'_site/pi5/57store/system/static/index.html').read_text())
 
+    def test_terminal_header_preserves_module_selection_inside_each_frame(self):
+        build(self.root,base_path='/preview')
+        for board,ident,selected in [('sys','sys-0','1'),('cctv','first','2')]:
+            for route in [board,board+'/'+ident]:
+                with self.subTest(route=route):
+                    page=BeautifulSoup((self.root/'_site'/route/'index.html').read_text(),'html.parser')
+                    frame=page.select_one('.store-terminal-frame')
+                    headers=frame.select('.store-terminal-header')
+                    self.assertEqual(len(headers),1)
+                    header=headers[0]
+                    self.assertIn('BOOT SEQUENCE INIT',header.get_text())
+                    self.assertIn('SYSTEM ONLINE',header.get_text())
+                    rows=header.select('.store-module-row')
+                    self.assertEqual([row['href'] for row in rows],['/preview/sys/','/preview/cctv/'])
+                    self.assertEqual([row.get_text(' ',strip=True) for row in rows],[
+                        '(1) TERMINAL.LOG … operator log / expiry',
+                        '(2) CCTV.MONITOR … camera index / event stream',
+                    ])
+                    selection=header.select_one('.store-module-select')
+                    self.assertEqual([a.get_text(strip=True) for a in selection.select('a')],['1','2'])
+                    self.assertEqual([a['href'] for a in selection.select('a')],['/preview/sys/','/preview/cctv/'])
+                    self.assertEqual([a.get_text(strip=True) for a in selection.select('a[aria-current="page"]')],[selected])
+                    self.assertEqual(selection.get_text(' ',strip=True),'SELECT: [ 1 ] [ 2 ]')
+                    self.assertNotIn('{{terminal_header}}',str(page))
+                    if '/' in route:
+                        self.assertFalse(frame.select('.wp-block-query-pagination'))
+                    else:
+                        self.assertIsNotNone(frame.select_one('.wp-block-query-pagination'))
+        single=BeautifulSoup((self.root/'_site/cctv/index.html').read_text(),'html.parser')
+        pager=single.select_one('.wp-block-query-pagination')
+        self.assertEqual(pager.get_text(' ',strip=True),'1')
+        self.assertEqual(pager.select_one('[aria-current="page"]').name,'span')
+        self.assertFalse(pager.select('a'))
+
+    def test_terminal_pagination_has_flat_numbers_and_adjacent_arrows_on_every_page(self):
+        for n in range(16,31):
+            self.post('sys',f'sys-{n}',f'2026-06-08T18:{n:02d}:00+08:00',body=f'system message {n}\n')
+        for n in range(2,35):
+            self.post('cctv',f'camera-{n}',f'2026-06-08T21:{n:02d}:00+08:00',video=f'CamTest{n:04d}')
+        receipt=build(self.root,base_path='/preview')
+        self.assertEqual(receipt['pages'],{'sys':3,'cctv':3,'cache':1})
+        for board in ['sys','cctv']:
+            def route(number):
+                return f'/preview/{board}/' if number==1 else f'/preview/{board}/page/{number}/'
+            for number in [1,2,3]:
+                with self.subTest(board=board,page=number):
+                    path=self.root/'_site'/board
+                    if number>1:path=path/'page'/str(number)
+                    page=BeautifulSoup((path/'index.html').read_text(),'html.parser')
+                    frame=page.select_one('.store-terminal-frame')
+                    pager=frame.select_one('.wp-block-query-pagination')
+                    self.assertIsNotNone(pager)
+                    self.assertIsNotNone(pager.parent.select_one('ul.wp-block-post-template'))
+                    self.assertEqual([el.get_text(strip=True) for el in pager.select('.page-numbers')],['1','2','3'])
+                    self.assertTrue(all(el.name in ['a','span'] for el in pager.find_all(recursive=False)))
+                    current=pager.select('[aria-current="page"]')
+                    self.assertEqual(len(current),1)
+                    self.assertEqual(current[0].name,'span')
+                    self.assertEqual(current[0].get_text(),str(number))
+                    for link in pager.select('a.page-numbers'):
+                        self.assertEqual(link['href'],route(int(link.get_text())))
+                    for direction,target,glyph,relation,visible in [
+                        ('previous',number-1,'«','prev',number>1),
+                        ('next',number+1,'»','next',number<3),
+                    ]:
+                        arrow=pager.select_one('.wp-block-query-pagination-'+direction)
+                        if visible:
+                            self.assertIsNotNone(arrow)
+                            self.assertIn('pager-arrow',arrow.get('class',[]))
+                            self.assertEqual(arrow.get_text(),glyph)
+                            self.assertEqual(arrow['href'],route(target))
+                            self.assertIn(relation,arrow.get('rel',[]))
+                            self.assertTrue(arrow.get('aria-label'))
+                        else:self.assertIsNone(arrow)
+
     def test_duplicate_video_is_rejected_even_when_other_record_hidden(self):
         self.post('cctv','duplicate','2026-06-08T23:00:00+08:00',video='AbCdEfG0001',status='hidden')
         with self.assertRaisesRegex(ValueError,'Duplicate CCTV video ID'):build(self.root)
