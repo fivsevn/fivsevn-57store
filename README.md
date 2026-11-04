@@ -32,8 +32,8 @@ source_of_truth: site
 filename_policy: entrypoint
 
 created: null
-updated: '2026-11-01'
-metadata_updated: '2026-11-01'
+updated: '2026-11-05'
+metadata_updated: '2026-11-05'
 ---
 # 57store
 
@@ -68,6 +68,8 @@ SYS saves the exact upload commit instant in Asia/Shanghai. A durable `.publishi
 CCTV follows the channel's complete public uploads playlist, including continuation pages, and verifies exact publication instants. Each video ID appears once; time and ordering come from YouTube. Future discovery checks all saved records, including hidden ones, so hiding a room cannot cause it to be imported again. A saved room's edited title and notes are independent of later discovery. Video files are played through YouTube embeds. SYS and CCTV share `templates/terminal-header.html` and `site-assets/terminal.css`, preserving the original compact WordPress interior and centered frame. Pagination follows Fieldlog's compact numbers and « / » arrows inside the frame; arrows move to the immediately previous or next page.
 
 Saved SYS/CCTV posts use the shared [site-post profile](https://github.com/fivsevn-agy/fivsevn-spec/blob/main/content/spec-content-site-post-001.md): `module: 57store`, `submodule: sys` or `cctv`, precise `extra.published_at`, and `extra.video_ids` for CCTV. Publication requires both `visibility: public` and a published status. These controls exclude records from website output; the source repository itself is public.
+
+CI and deployment read the fixed Spec revision from [.github/spec-ref](.github/spec-ref); upgrade that pin together with both local helpers and both schemas.
 
 Publication images follow the [media naming contract](https://github.com/fivsevn-agy/fivsevn-spec/blob/main/content/spec-content-media-naming-001.md). Reused icons, artwork and fonts retain their names under `site-assets/`. Package IDs and image numbers remain stable when titles or display order change.
 
