@@ -11,11 +11,21 @@ from pathlib import Path, PurePosixPath
 import re
 import shutil
 import subprocess
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 from zoneinfo import ZoneInfo
 import markdown
 from bs4 import BeautifulSoup
 from site_post_metadata import read_frontmatter, validate_metadata, published_datetime, is_published
+from head_metadata import compact_text, metadata_head, add_missing_metadata
+
+SITE_URL = 'https://57store.fivsevn.com'
+DESCRIPTIONS = {
+    'home':'五月七日便利店，保存日志、影像与片段的叙事空间。',
+    'sys':'SYS · 五月七日便利店的系统日志。',
+    'cctv':'CCTV · 五月七日便利店的影像记录。',
+    'cache':'.cache · 五月七日便利店的连续对话与留存片段。',
+    'fragment':'Fragment · 五月七日便利店的片段记录。',
+}
 
 ROOT = Path(__file__).resolve().parents[1]
 SIZES = {'sys': 15, 'cctv': 17}
@@ -181,7 +191,8 @@ def build(root=ROOT, output=None, base_path=''):
             page.select_one(f'.store-module-select a[href="/{board}/"]')['aria-current']='page'
         return page
     def route(board,number):return '/'+board+'/' if number==1 else f'/{board}/page/{number}/'
-    def save(route_,kind,body,title):
+    canonical_routes=[]
+    def save(route_,kind,body,title,post=None,page_number=1):
         frame=(root/'templates/frame.html').read_text() if (root/'templates/frame.html').exists() else '<main>{{content}}</main>'
         if frame.count('{{content}}')!=1:raise ValueError('Frame needs one content slot')
         wrapped=BeautifulSoup(frame.replace('{{content}}',str(body)),'html.parser')
@@ -208,8 +219,21 @@ def build(root=ROOT, output=None, base_path=''):
             source=root/'site-assets/cache.js';version='?v='+digest(source)[:12] if source.exists() else ''
             script=f'<script src="{base}/site-assets/cache.js{version}" defer></script>'
         html_class=' class="store-terminal-root"' if kind in {'sys','cctv'} else ''
-        text=f'<!doctype html><html lang="zh-CN"{html_class}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#131415"><title>{html.escape(title)}</title>'+''.join(styles)+f'</head><body class="wp-embed-responsive store-{kind}">'+str(wrapped)+script+'</body></html>'
+        description=DESCRIPTIONS[kind]+(f' 第 {page_number} 页。' if page_number>1 else '')
+        cover='site-assets/images/pages/57store/57store20260224f.webp'
+        image=SITE_URL+'/'+cover if (root/cover).is_file() else None
+        image_alt='五月七日便利店'
+        if post:
+            meta=post['meta']
+            description=compact_text(meta.get('summary') or BeautifulSoup(render_body(post,kind),'html.parser').get_text(' ',strip=True),meta['title']+' · '+kind.upper()+' / 57store。')
+            resource=meta['extra'].get('image','')
+            if resource.startswith('assets/'):
+                image=SITE_URL+quote('/'+kind+'/'+meta['id']+'/'+resource,safe='/')
+                image_alt=meta['extra'].get('alt','') or meta['title']
+        metadata=metadata_head(title,description,SITE_URL+quote(route_,safe='/'),site_name='五月七日便利店 · 57store',image=image,image_alt=image_alt,article=post is not None)
+        text=f'<!doctype html><html lang="zh-CN"{html_class}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#131415"><title>{html.escape(title)}</title>'+metadata+''.join(styles)+f'</head><body class="wp-embed-responsive store-{kind}">'+str(wrapped)+script+'</body></html>'
         target=out/route_.strip('/')/'index.html';target.parent.mkdir(parents=True,exist_ok=True);target.write_text(text)
+        canonical_routes.append(route_)
     def paginate(page,board,number,total):
         nav=page.select_one('.wp-block-query-pagination')
         if nav is None:raise ValueError('Missing pagination template')
@@ -247,13 +271,13 @@ def build(root=ROOT, output=None, base_path=''):
         for n in range(1,total+1):
             page=template(f'templates/{board}-page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear()
             for post in values[(n-1)*SIZES[board]:n*SIZES[board]]:listing.append(card(board,post))
-            paginate(page,board,n,total);save(route(board,n),board,page,'57store / '+board)
+            paginate(page,board,n,total);save(route(board,n),board,page,'57store / '+board,page_number=n)
         for index,post in enumerate(values):
             page=template(f'templates/{board}-page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear();listing.append(card(board,post,True))
             page.select_one('.wp-block-query-pagination').decompose()
             back=page.new_tag('p',attrs={'class':'store-return','style':'font-size:10px'});a=page.new_tag('a',attrs={'href':route(board,index//SIZES[board]+1)+'#'+post['meta']['id']});a.string='◁ '+board;back.append(a)
             page.select_one('.wp-block-query').insert_before(back)
-            save(f"/{board}/{post['meta']['id']}/",board,page,post['meta']['title']+' · 57store')
+            save(f"/{board}/{post['meta']['id']}/",board,page,post['meta']['title']+' · 57store',post=post)
     pages['cache']=1
     page=template('cache/page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear()
     for post in cache:
@@ -277,7 +301,8 @@ def build(root=ROOT, output=None, base_path=''):
     # Old conversation bookmarks return to the continuous thread.
     legacy=out/'cache/page/2/index.html';legacy.parent.mkdir(parents=True,exist_ok=True)
     destination=base+'/cache/#'+('cache-'+datetime.fromisoformat(cache[-1]['published_at']).strftime('%Y%m%d-%H%M%S') if cache else '')
-    legacy.write_text('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url='+html.escape(destination,quote=True)+'"><link rel="canonical" href="'+base+'/cache/"><title>.cache</title></head><body><a href="'+html.escape(destination,quote=True)+'">.cache</a></body></html>')
+    legacy_metadata=metadata_head('.cache',DESCRIPTIONS['cache'],SITE_URL+'/cache/',site_name='五月七日便利店 · 57store')
+    legacy.write_text('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url='+html.escape(destination,quote=True)+'">'+legacy_metadata+'<title>.cache</title></head><body><a href="'+html.escape(destination,quote=True)+'">.cache</a></body></html>')
     home=template('templates/home.html')
     for key,unit in [('revisions','entries'),('receipts','receipts')]:
         slots=home.select(f'[data-store-stat="{key}"]')
@@ -285,6 +310,21 @@ def build(root=ROOT, output=None, base_path=''):
         slots[0].string=f'{stats[key]:,} {unit}'
     save('/','home',home,'57store.fivsevn')
     save('/fragment/','fragment',template('fragment/page.html'),'57store / fragment')
+    # Retained experiments keep their original body and scripts; enrich only their head.
+    for retained in sorted(out.rglob('*.html')):
+        relative=retained.relative_to(out).as_posix()
+        route_='/'+relative.removesuffix('index.html') if retained.name=='index.html' else '/'+relative
+        if route_ in canonical_routes or retained==legacy:continue
+        document=retained.read_text()
+        head=BeautifulSoup(document,'html.parser').head
+        if head is None:continue
+        title=head.title.get_text() if head.title else '57store'
+        description='Toilet · 五月七日便利店的独立空间。' if route_.startswith('/toilet/') else '57store · 店内系统的静态记录。'
+        metadata=metadata_head(title,description,SITE_URL+quote(route_,safe='/'),site_name='五月七日便利店 · 57store')
+        retained.write_text(add_missing_metadata(document,metadata))
+        canonical_routes.append(route_)
+    (out/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+html.escape(SITE_URL+quote(route_,safe='/'))+'</loc></url>' for route_ in sorted(set(canonical_routes)))+'</urlset>')
+    (out/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: '+SITE_URL+'/sitemap.xml\n')
     (out/'.nojekyll').write_text('')
     if (root/'CNAME').exists():shutil.copyfile(root/'CNAME',out/'CNAME')
     files={p.relative_to(out).as_posix():digest(p) for p in sorted(out.rglob('*')) if p.is_file()}
