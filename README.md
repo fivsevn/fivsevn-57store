@@ -53,7 +53,7 @@ Source for [57store.fivsevn.com](https://57store.fivsevn.com/), a narrative exte
 | `/toilet/` | `toilet/` | Existing interactive room |
 | `/pi5/57store/system/static/` | `pi5/57store/system/static/`, sibling `data/` | Existing terminal prototype |
 
-Receipt layout and labels are editable in `templates/home.html`. Two counters are calculated during every build: **STORE REVISIONS** counts all commits reachable from the checked-out Git revision, including automated publication commits; **RECEIPTS ISSUED** counts published, public SYS and CCTV entries. Cache messages, drafts and hidden entries are excluded. Statistics are generated only in the build output and require a complete Git checkout (`git fetch --unshallow` for a shallow clone). The existing push and scheduled deployments refresh both values without a visitor-tracking service.
+Receipt layout and labels are editable in `templates/home.html`. Two counters are calculated during every build: **STORE LOG / 店务记录** displays one entry per commit reachable from the checked-out Git revision, including automated publication commits; **RECEIPTS PRINTED / 累计出单** counts published, public SYS and CCTV entries. Cache messages, drafts and hidden entries are excluded. Statistics are generated only in the build output and require a complete Git checkout (`git fetch --unshallow` for a shallow clone). The existing push and scheduled deployments refresh both values without a visitor-tracking service.
 
 CCTV artwork, the signed shortcut, boot capsule, room assets and Raspberry Pi application remain available for their existing uses. The website homepage is built from `templates/home.html`. The static Pi prototype retains its seeded fallbacks; its Flask `/api/` services still require the separate Pi application.
 

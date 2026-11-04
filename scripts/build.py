@@ -279,7 +279,7 @@ def build(root=ROOT, output=None, base_path=''):
     destination=base+'/cache/#'+('cache-'+datetime.fromisoformat(cache[-1]['published_at']).strftime('%Y%m%d-%H%M%S') if cache else '')
     legacy.write_text('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url='+html.escape(destination,quote=True)+'"><link rel="canonical" href="'+base+'/cache/"><title>.cache</title></head><body><a href="'+html.escape(destination,quote=True)+'">.cache</a></body></html>')
     home=template('templates/home.html')
-    for key,unit in [('revisions','revisions'),('receipts','receipts')]:
+    for key,unit in [('revisions','entries'),('receipts','receipts')]:
         slots=home.select(f'[data-store-stat="{key}"]')
         if len(slots)!=1:raise ValueError('Homepage needs one statistic slot: '+key)
         slots[0].string=f'{stats[key]:,} {unit}'

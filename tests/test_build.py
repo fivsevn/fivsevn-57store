@@ -206,7 +206,7 @@ class BuildTests(unittest.TestCase):
         final=build(self.root);check(self.root)
         self.assertEqual(final['store_stats'],{'revisions':2,'receipts':19})
         home=BeautifulSoup((self.root/'_site/index.html').read_text(),'html.parser')
-        self.assertEqual(home.select_one('[data-store-stat=revisions]').get_text(),'2 revisions')
+        self.assertEqual(home.select_one('[data-store-stat=revisions]').get_text(),'2 entries')
         self.assertEqual(home.select_one('[data-store-stat=receipts]').get_text(),'19 receipts')
 
     def test_store_statistics_reject_incomplete_git_history(self):
