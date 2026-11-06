@@ -299,7 +299,7 @@ def render_scene():
     # Back stock / staff utilities. Door connects directly to a public aisle.
     g('stock');box(38,1175,62,73,STEEL,DARK,9)
     for xx,yy in ((43,1180),(43,1213)):carton(xx,yy,45,22)
-    carton(137,1221,42,26);carton(181,1211,34,24);end()
+    end()  # Reserve cartons stay on the rack; the door approach stays clear.
     g('lockers')
     for xx in (177,210):
         box(xx,1175,29,63,STEEL,DARK,7);r(xx+19,1201,3,8,INK)
