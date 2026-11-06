@@ -1,9 +1,9 @@
 /* A room, without a site header, footer, floating navigation or hover UI. */
 @font-face{font-family:Store Mono;src:url('/site-assets/fonts/u-450q2lgwslOqpF_6gQ8kELWwNjW-_-tvg.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
-:root{color-scheme:dark;--mint:#50efc2;--paper:#dce7d5}
+:root{color-scheme:dark;--mint:#53efc0;--paper:#bdc7c5}
 *{box-sizing:border-box}
-html{background:#101b1a;scroll-behavior:smooth}
-body{margin:0;background:#101b1a;color:var(--paper);font-family:Store Mono,ui-monospace,monospace}
+html{background:#131415;scroll-behavior:smooth}
+body{margin:0;background:#131415;color:var(--paper);font-family:Store Mono,ui-monospace,monospace}
 .store-shell{width:min(100%,800px);margin:auto}
 .store-floor{position:relative;margin:0;isolation:isolate}
 .store-art{display:block;width:100%;height:auto}
@@ -13,8 +13,8 @@ body{margin:0;background:#101b1a;color:var(--paper);font-family:Store Mono,ui-mo
 [hidden]{display:none!important}
 /* Keyboard feedback follows the artwork rather than a rectangular hit area. */
 .is-focused{filter:drop-shadow(0 0 3px #c8ffe1)}
-.shelf-label{position:absolute;z-index:5;width:max-content;max-width:112px;padding:4px 6px;border:1px solid #65816b;background:#13271ff2;color:#dce7d5;box-shadow:1px 2px 0 #08171099;pointer-events:none;font-family:Store Mono,ui-monospace,monospace;line-height:1.35}
-.shelf-label strong{display:block;color:#74e3b3;font-size:10px;font-weight:400;margin:0 0 2px}
+.shelf-label{position:absolute;z-index:5;width:max-content;max-width:112px;padding:4px 6px;border:1px solid #50595c;background:#131415f5;color:#bdc7c5;box-shadow:1px 2px 0 #08171099;pointer-events:none;font-family:Store Mono,ui-monospace,monospace;line-height:1.35}
+.shelf-label strong{display:block;color:#53efc0;font-size:10px;font-weight:400;margin:0 0 2px}
 .shelf-label span{display:block;font-size:9px}
 /* Deliberately separate timings: a working shop, not synchronized blinking. */
 .sign-light{animation:sign-breathe 8s ease-in-out infinite -3s}

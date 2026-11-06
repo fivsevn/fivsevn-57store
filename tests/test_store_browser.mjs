@@ -42,14 +42,15 @@ try {
     assert.equal(await page.locator('.object-toilet,.object-toiletdoor,.object-toiletbasin').count(),3,'Toilet is visible as room fixtures');
     assert.equal(await page.locator('a[href*="toilet"],a[href*="cache"],a[href*="fragment"]').count(),0);
     for (const route of ['sys','cctv']) {
-      assert.ok(config.entries.find(entry=>entry.id===route).bounds[1]>2000,`${route} must be in the rear staff area`);
+      const coldStock=config.fixtures.find(fixture=>fixture.id==='coldstock').bounds;
+      assert.ok(config.entries.find(entry=>entry.id===route).bounds[1]>=coldStock[1]+coldStock[3],`${route} must be behind the cold-room stock area`);
     }
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),true,`Horizontal overflow at ${width}`);
     const boxes = await page.locator('[data-store-object]').evaluateAll(nodes=>nodes.map(node=>{
       const r=node.getBoundingClientRect(); return {id:node.dataset.storeObject,small:node.dataset.small==='true',x:r.x,y:r.y,width:r.width,height:r.height};
     }));
     assert.ok(boxes.find(b=>b.id==='door').y<boxes.find(b=>b.id==='receipt').y,'Entrance appears before checkout');
-    for (const route of ['sys','cctv']) assert.ok(boxes.find(b=>b.id===route).y>boxes.find(b=>b.id==='drinks').y,`${route} is in the rear office`);
+    for (const route of ['sys','cctv']) assert.ok(boxes.find(b=>b.id===route).y>boxes.find(b=>b.id==='drinks').y,`${route} is in the rear staff workplace`);
     for (const box of boxes) {
       const min=box.small?24:44;
       assert.ok(box.width>=min-.01 && box.height>=min-.01,`Undersized target: ${JSON.stringify(box)}`);

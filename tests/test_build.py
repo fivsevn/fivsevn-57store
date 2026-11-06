@@ -220,6 +220,10 @@ class BuildTests(unittest.TestCase):
         art=page.select_one('svg.store-art')
         self.assertIsNotNone(art)
         self.assertFalse(art.select('image,foreignObject,foreignobject,script,iframe'))
+        colours={element['fill'].lower() for element in art.select('[fill]') if element['fill'].startswith('#')}
+        self.assertLessEqual(len(colours),8,'57store uses a restrained charcoal/mint palette')
+        self.assertIn('#131415',colours)
+        self.assertIn('#53efc0',colours)
         for element in art.find_all(True):
             for attribute in ('href','xlink:href','src'):
                 if element.has_attr(attribute):
@@ -229,8 +233,9 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(len(page.select('button.store-object')),len(config['fixtures']))
         for entry in config['entries']:
             if entry['id'] in ('sys','cctv'):
-                self.assertGreater(entry['bounds'][1],2000,'Both terminals belong in the rear staff area')
-        for fixture in ('toiletdoor','toilet','toiletbasin','wash','handsink','foodprep','stock','receiving','breaktable','lockers','bench'):
+                coldstock=next(f['bounds'] for f in config['fixtures'] if f['id']=='coldstock')
+                self.assertGreaterEqual(entry['bounds'][1],coldstock[1]+coldstock[3],'Internal computers are behind the cold-room stock area')
+        for fixture in ('toiletdoor','toilet','toiletbasin','staffwork','stock','receiving','staffbreak','lockers','cleaning'):
             self.assertIsNotNone(page.select_one(f'#fixture-{fixture}'))
             self.assertIsNotNone(page.select_one(f'button[data-store-object="{fixture}"]'))
         self.assertFalse(page.select('a[href*="toilet"],a[href*="cache"],a[href*="fragment"]'))

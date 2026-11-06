@@ -1,13 +1,14 @@
 # Store interior
 
-`/` is an original portrait high-angle overhead cutaway of 57STORE. Everything visible belongs to the shop. Do not add a masthead, site footer, instructional floor text, floating navigation markers or hover-only information.
+`/` is an original portrait RPG cutaway of 57STORE. Everything visible belongs to the shop. Do not add a masthead, site footer, instructional floor text, floating navigation markers or hover-only information.
 
 ## Sources and layout
 
 The entrance is at the **top**, so a phone enters from the front and scrolls deeper into the shop. The counter is beside the entrance, with a short bounded cashier workspace. Magazines face the front window; umbrellas and baskets stay to its side. Larger central snack, noodle and bread gondolas have cross-aisles between them; daily goods sit on the perimeter. Both side aisles are public. Coffee and waste sorting are separate from chilled dairy and the sliding-lid ice-cream freezer. Rice balls, sandwiches and bentos sit in open chilled cases along the opposite perimeter.
 
-The drink display at the rear is a **walk-in cooler**, not a shallow cabinet pushed against an arbitrary wall. Behind its glass doors there are rear-access stock racks, an open replenishment aisle, boxed pre-chilled drinks and a circulating-air unit. A thick insulated swing door connects this room to the back stock room. The staff entrance opens from the public rear cross-aisle. A separate public toilet has its own door from the rear customer aisle, toilet bowl, paper holder, support rail and basin. The employee entrance is a different door. Beyond it, the rear workplace continues through receiving/dry stock, a dedicated cleaning recess, utensil wash-up, a separate employee handwash basin and food preparation, then an office containing both the internal SYS computer and CCTV computer, and finally a tea/break area with personal fridge, table, chairs, changing bench and lockers. Physical partitions have real openings and the service spine stays clear. Neither internal terminal is a public self-service kiosk. The small camera above the front window is only a camera.
+The rear drink display is the customer face of a compact **walk-in cooler**. Its stock lanes have depth, and a narrow working aisle and reserve stock sit behind them. Staff enter through an insulated side door from the service passage. Other open chilled cases and the chest freezer are separate equipment, not additional giant cold rooms.
 
+The public rear cross-aisle has two distinct doors: the customer toilet and employee access. The toilet tank meets the north installation wall, with paper and controls on the seated person's side, the door offset to the right, and the basin fixed to the east wall. The front of the bowl stays clear. Behind the cooler / toilet is **one compact staff workplace**, not separate office and rest-room floors. Stock racks follow the west wall; SYS, CCTV and lockers share the north wall with their use sides facing the central staff aisle. The south-wall wash/preparation and tea counters are used from the north; the visible south cabinet surfaces are their plain backs. Enclosed cleaning storage and a folding stool complete the perimeter. The centre stays available for work and circulation. Both computers remain internal equipment.
 This is a compact fictional store, not a construction drawing or a traced floor plan. Equipment types and circulation were checked against:
 
 - [Seven & i: store layout and merchandising](https://www.7andi.com/company/challenge/2751/2.html) — checkout circulation and grouped chilled/daily food.
@@ -29,17 +30,28 @@ References inform the design; no reference photos, floor plans, tutorials or thi
 
 ## Drawing perspective
 
-The scene uses one high-angle parallel camera. Horizontal ground edges stay horizontal; ground depth follows the page; height is a short northward projection. Top surfaces and open equipment footprints dominate. South-facing thickness is kept short instead of displaying full-height cabinet fronts. Central gondolas show their spine and two stocked sides from above; cold cases show their top opening, shelf depth and a narrow glazed/lit edge. Office monitors have visible top housings, compressed screens, desktop keyboards and seat tops. People show a hair crown, shoulders and hands, rather than a frontal face.
+The reference is the **spatial readability** of a classic RPG: horizontal/vertical floor directions, broad top planes, visible standing faces, substantial shelf edges and contact shadows. It is not a directly overhead plan, and not an all-front elevation. Equipment is drawn from actual photographed construction: bean hoppers and cup bays, glass hot-food trays, tilt-mounted POS screens, separate printer slots, open refrigerated shelves and sliding-lid freezer baskets. Screen contents remain legible. People have a crown, small face, coat and feet so their height is readable.
 
-This requires redrawing the objects; applying a scale/skew to an elevation does not create their unseen top planes. Keep this camera consistent when adding a module or fixture. Projection references: [Cornell's Perspective in 2D Games lecture](https://www.cs.cornell.edu/courses/cs3152/2019sp/lectures/15-Perspective.pdf) and [Roman Gurbanov's pixel-art projection diagrams](https://pixelart.school/learn/pixel-art-perspective).
+The style remains 57store's. The dominant ground is the existing website background **#131415**. The entire illustration uses eight source colours: `#0a0b0c`, `#131415`, `#25292b`, `#50595c`, `#879393`, `#bdc7c5`, `#e0e6e2`, `#53efc0`. Gray value planes establish volume; mint is reserved mainly for equipment light, displays and branding. No warm farm palette, copied character sprites or game tile art is used.
+
+Additional first-hand resources reviewed for the rebuild:
+
+- [FamilyMart store operator visit, photographed sales floor and walk-in replenishment](https://www.nishimu.co.jp/news_top/blog/info/126): dense stock, narrow working aisle and customer display / rear replenishment relationship.
+- [Lawson refrigeration and whole-store equipment illustration](https://www.lawson.co.jp/company/activity/environment/preservation/saving/index.html): a labelled equipment-system diagram, plus actual store equipment photos; the illustration is not a measured store plan.
+- [Lawson counter project by its designer](https://ottimo-d.com/work/lawson-counter): compact front/back counter service equipment; renderings, not store photographs.
+- [Lawson Asuka Okuyama photographed restroom](https://unchique.com/archives/55008), [TOTO installation-condition diagram](https://jp.toto.com/assets/files/toilet_purerest_cond.pdf): rear wall, side controls/paper, door and basin relationships. TOTO's residential example is not a convenience-store dimension standard.
+- [LimeZu grocery-store demonstration](https://limezu.itch.io/moderninteriors/devlog/210634/146th-update-grocery-store-9), [Stardew Valley official media](https://www.stardewvalley.net/media/) and the game's Pierre / Joja interior screenshots: visual study of volume and occlusion only. Their textures, colours and character designs are not embedded or traced.
+- [Saint11's original pixel tutorials](https://github.com/saint11/Saint11Tutorials): clusters, shading, surface material, local light and top-down occlusion.
+
+A local reference board and original Blender layout-volume study are review aids outside the website repository. Blender helps check wall attachment, object height and circulation; its rendered image is not used as a website texture. The runtime continues to use editable SVG geometry generated by the module's Python sources.
 
 ## Module files
 
 - `page.html`: semantic main, figure, three destinations, invisible descriptive alternative.
-- `scene.py`: deterministic, layered, integer-coordinate SVG. Coordinate space is **640 × 2660**; no runtime renderer, external art service, framework or fetch.
+- `scene.py`: deterministic, layered, integer-coordinate SVG. Coordinate space is **640 × 1960**; no runtime renderer, external art service, framework or fetch.
 - `equipment.py`: independently drawn coffee, hot-food, POS/printer, microwave, magazine, fresh-food, bento, dairy, freezer and drink equipment with real construction details.
 - `furnishings.py`: separately drawn stock shapes, office computers, toilet, storage, cleaning, sink, break table and lockers.
-- `config.json`: 3 route anchors and 46 compact inspection notes with authored hit areas. Descriptions represent fictional stock, not live inventory.
+- `config.json`: 3 route anchors and 39 compact inspection notes with authored hit areas. Descriptions represent fictional stock, not live inventory.
 - `style.css`: room scaling, in-world feedback, compact notes and motion.
 - `interactions.js`: tap/click/keyboard, note positioning and visibility-aware animation pausing.
 
@@ -47,7 +59,7 @@ The desktop width is capped at 800 CSS pixels. Mobile scales proportionally and 
 
 ## Interaction and animation
 
-Inspection shows a **compact dark game tooltip**, at most 112px wide and 60px high, with a 10px object name and a few 9px words describing its purpose or contents. No overlay, inventory sheet, close button, focus trap or hover state. Tap again, tap elsewhere or press Escape to close. All 46 notes can be reached by keyboard. The receipt printer, SYS terminal and office CCTV computer remain ordinary links. Unmodified clicks briefly move paper or screen content before navigation; modified/new-tab clicks retain browser behavior. Keyboard focus illuminates the actual object rather than drawing a hit-box outline.
+Inspection shows a **compact dark game tooltip**, at most 112px wide and 60px high, with a 10px object name and a few 9px words describing its purpose or contents. No overlay, inventory sheet, close button, focus trap or hover state. Tap again, tap elsewhere or press Escape to close. All 39 notes can be reached by keyboard. The receipt printer, SYS terminal and office CCTV computer remain ordinary links. Unmodified clicks briefly move paper or screen content before navigation; modified/new-tab clicks retain browser behavior. Keyboard focus illuminates the actual object rather than drawing a hit-box outline.
 
 The motion designs are independent and deliberately unsynchronised:
 
