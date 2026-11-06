@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('../site-assets/cache.js', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../cache/reveal.js', import.meta.url), 'utf8');
 for (const initialState of ['loading','complete']) {
   for (const value of ['', 'arbitrary words', '123456', '中文']) {
     let submit, ready, prevented = 0, network = 0;

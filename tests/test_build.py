@@ -19,10 +19,16 @@ from site_post_metadata import normalize_metadata,dump_frontmatter
 class BuildTests(unittest.TestCase):
     def setUp(self):
         self.temporary=tempfile.TemporaryDirectory();self.addCleanup(self.temporary.cleanup);self.root=Path(self.temporary.name)
-        for folder in ['templates','schemas','site-assets']:
+        for folder in ['templates','schemas','site-assets','receipt','cache','fragment']:
             shutil.copytree(ROOT/folder,self.root/folder)
-        (self.root/'cache').mkdir();shutil.copyfile(ROOT/'cache/page.html',self.root/'cache/page.html')
-        (self.root/'fragment').mkdir();shutil.copyfile(ROOT/'fragment/page.html',self.root/'fragment/page.html')
+        for board in ('sys','cctv'):
+            (self.root/board).mkdir()
+            for name in ('page.html','card.html'):shutil.copyfile(ROOT/board/name,self.root/board/name)
+        (self.root/'store').mkdir()
+        (self.root/'store/page.html').write_text('<main><h1>{{scene_description}}</h1>{{scene_svg}}<nav>{{scene_controls}}</nav></main>')
+        (self.root/'store/scene.py').write_text('def render():\n    return {"svg": \'<svg role="img" aria-label="A store" viewBox="0 0 100 100"><rect width="100" height="100"/></svg>\', "controls": \'<a href="/receipt/">Receipt</a><a href="/sys/">SYS</a><a href="/cctv/">CCTV</a>\', "description": "A night store"}\n')
+        (self.root/'store/style.css').write_text('body { margin:0; }')
+        (self.root/'store/visit.js').write_text('document.documentElement.dataset.storeReady = "true";')
         (self.root/'site-data').mkdir();(self.root/'site-data/content.json').write_text(json.dumps({'retained_posts':{},'assets':[]}))
         (self.root/'cache/posts.json').write_text(json.dumps([{'title':'cache','published_at':f'2026-06-08T18:{n:02d}:00+08:00','body_html':f'<p>message {n}</p>'} for n in range(11)]))
         (self.root/'toilet/assets').mkdir(parents=True);(self.root/'toilet/index.html').write_text('<img src="assets/original.png">');(self.root/'toilet/assets/original.png').write_bytes(b'preserved image')
@@ -171,7 +177,7 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(form['method'],'dialog')
         self.assertTrue(reply.has_attr('hidden'));self.assertEqual(reply.a['href'],'https://fivsevn.com/')
         self.assertFalse(item.select('time'))
-        self.assertTrue(page.select_one('script[src*="/site-assets/cache.js"]'))
+        self.assertTrue(page.select_one('script[src*="/cache/reveal.js"]'))
         self.assertEqual(receipt['counts']['cache'],11)
 
     def test_new_sys_plain_two_line_entry_keeps_its_line_break(self):
@@ -205,9 +211,9 @@ class BuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Store statistics differ'):check(self.root)
         final=build(self.root);check(self.root)
         self.assertEqual(final['store_stats'],{'revisions':2,'receipts':19})
-        home=BeautifulSoup((self.root/'_site/index.html').read_text(),'html.parser')
-        self.assertEqual(home.select_one('[data-store-stat=revisions]').get_text(),'2 entries')
-        self.assertEqual(home.select_one('[data-store-stat=receipts]').get_text(),'19 receipts')
+        ticket=BeautifulSoup((self.root/'_site/receipt/index.html').read_text(),'html.parser')
+        self.assertEqual(ticket.select_one('[data-store-stat=revisions]').get_text(),'2 entries')
+        self.assertEqual(ticket.select_one('[data-store-stat=receipts]').get_text(),'19 receipts')
 
     def test_store_statistics_reject_incomplete_git_history(self):
         clone=self.root/'shallow'

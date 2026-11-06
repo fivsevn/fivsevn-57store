@@ -147,87 +147,87 @@
   "cache_messages": 11,
   "assets": [
     {
-      "path": "site-assets/images/avatar/avatar202511main512.png",
+      "path": "fragment/assets/avatar202511main512.png",
       "bytes": 456896,
       "sha256": "db45ddb01a2ee146477ecebddfdea359304bbc426202ac070a126c123bcb041a"
     },
     {
-      "path": "site-assets/images/avatar/avatar202511nvesvif512.png",
+      "path": "cache/assets/avatar202511nvesvif512.png",
       "bytes": 257435,
       "sha256": "335acb7f4c8d3f094b9d430507b803e520faf816219bfb91ba80f3f6215b9083"
     },
     {
-      "path": "site-assets/images/avatar/avatar202603fragment1.webp",
+      "path": "fragment/assets/avatar202603fragment1.webp",
       "bytes": 880862,
       "sha256": "510f3480e32dbb46055856aabda8a62d1d5e56581357722723e8f558fbc2ce95"
     },
     {
-      "path": "site-assets/images/avatar/avatar202603fragment169.webp",
+      "path": "fragment/assets/avatar202603fragment169.webp",
       "bytes": 526486,
       "sha256": "6295c80cc95b4de5c80286b31af918f0a7f11791c65ef93627c4916aab7888bf"
     },
     {
-      "path": "site-assets/images/avatar/avatar202603fragment2.webp",
+      "path": "fragment/assets/avatar202603fragment2.webp",
       "bytes": 895962,
       "sha256": "aac8de622826f1daa3048c3ce1fe677e53ea42b129c37e592203d76b7fc2a1d2"
     },
     {
-      "path": "site-assets/images/common/icon/discord.png",
+      "path": "receipt/assets/icons/discord.png",
       "bytes": 2380,
       "sha256": "68881624d27f391979a3c3ba1c9386dcd7b4dcbee3f38e987ea7a2c66a57ab0a"
     },
     {
-      "path": "site-assets/images/common/icon/facebook.png",
+      "path": "receipt/assets/icons/facebook.png",
       "bytes": 2050,
       "sha256": "649bccda3971453196dab0e1d5cb67909b6874fd229c550d135f2f5cb0cb93c9"
     },
     {
-      "path": "site-assets/images/common/icon/instagram.png",
+      "path": "receipt/assets/icons/instagram.png",
       "bytes": 2578,
       "sha256": "5a0adf27ec7abc418c3c85ef9b8b3358f583fc6756b3134bf4217fe4502cdc26"
     },
     {
-      "path": "site-assets/images/common/icon/mastodon.png",
+      "path": "receipt/assets/icons/mastodon.png",
       "bytes": 2458,
       "sha256": "9875a9863b173fff06e48f30b7776a3f736e6bca91857e6288852e191d184463"
     },
     {
-      "path": "site-assets/images/common/icon/pinterest.png",
+      "path": "receipt/assets/icons/pinterest.png",
       "bytes": 2533,
       "sha256": "2b761e7714df95eb3b74bd62b4a08f517b4aa1b68bec1859277743457750b85a"
     },
     {
-      "path": "site-assets/images/common/icon/reddit.png",
+      "path": "receipt/assets/icons/reddit.png",
       "bytes": 2534,
       "sha256": "59f933509b112904e0c6839d6faf58d9fa2cfdf9b8b73ec289f43114b5085318"
     },
     {
-      "path": "site-assets/images/common/icon/threads.png",
+      "path": "receipt/assets/icons/threads.png",
       "bytes": 2465,
       "sha256": "e7a5d5d72f16c6fb517577757267d0647f2f9dd824a7ef7ea16bb076b74d5d88"
     },
     {
-      "path": "site-assets/images/common/icon/tiktok.png",
+      "path": "receipt/assets/icons/tiktok.png",
       "bytes": 2220,
       "sha256": "049184a0d54f92f7ca25571757bd13e4990a4fe60d62b075ee7fc39d67a69490"
     },
     {
-      "path": "site-assets/images/common/icon/tumblr.png",
+      "path": "receipt/assets/icons/tumblr.png",
       "bytes": 2031,
       "sha256": "3a30d116ca659bbc594309dbe17c14cd468b8e590e4bb1a4881efd1f1cf09ee4"
     },
     {
-      "path": "site-assets/images/common/icon/x.png",
+      "path": "receipt/assets/icons/x.png",
       "bytes": 2335,
       "sha256": "0986347506047dd42291e0a5d0501b6f63ecae2ba59844a830e17431d1cee94f"
     },
     {
-      "path": "site-assets/images/common/icon/youtube.png",
+      "path": "receipt/assets/icons/youtube.png",
       "bytes": 2364,
       "sha256": "dcf212114d4c48cd5ece2d80f96de7d998ff5f6cf67b983231de82b7fa3cb264"
     },
     {
-      "path": "site-assets/images/homepage/homepage20260607intake.webp",
+      "path": "cache/assets/homepage20260607intake.webp",
       "bytes": 752622,
       "sha256": "f3504b42168934063f130b9882e88a7929275e5c01ea0ed5406f464ce4b1795d"
     },

@@ -40,3 +40,6 @@ env/
 # Website build
 _site/
 .metadata-spec/
+
+# Browser development tools
+node_modules/
