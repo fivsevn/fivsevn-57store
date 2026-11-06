@@ -1,52 +1,79 @@
-/* Touch, mouse and keyboard all use the same click action. No hover state. */
+/* Tap/click/keyboard only. Labels are tiny non-modal notes beside real objects. */
 (() => {
   const floor = document.querySelector('.store-floor');
   if (!floor) return;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const choice = new URLSearchParams(location.search).get('motion');
+  let motionOverride = choice === 'on';
+  try {
+    if (choice === 'on') sessionStorage.setItem('57store-motion', 'on');
+    if (choice === 'off') sessionStorage.removeItem('57store-motion');
+    motionOverride = sessionStorage.getItem('57store-motion') === 'on';
+  } catch { /* The query still works if session storage is unavailable. */ }
+  document.documentElement.classList.toggle('motion-enabled', motionOverride);
+  const motionAllowed = () => motionOverride || !reducedMotion.matches;
+  let openLabel = null;
+  let openTrigger = null;
+  const close = () => {
+    if (openLabel) openLabel.hidden = true;
+    if (openTrigger) openTrigger.setAttribute('aria-expanded', 'false');
+    openLabel = openTrigger = null;
+  };
+  const position = () => {
+    if (!openLabel || !openTrigger) return;
+    const room = floor.getBoundingClientRect();
+    const target = openTrigger.getBoundingClientRect();
+    const label = openLabel.getBoundingClientRect();
+    const left = Math.max(8, Math.min(room.width - label.width - 8, target.left - room.left + target.width / 2 - label.width / 2));
+    const above = target.top - room.top - label.height - 8;
+    const top = target.top - label.height - 8 > 8 ? above : target.bottom - room.top + 8;
+    openLabel.style.left = `${left}px`;
+    openLabel.style.top = `${Math.max(8, Math.min(room.height-label.height-8, top))}px`;
+  };
   for (const trigger of floor.querySelectorAll('[data-store-object]')) {
     const fixture = document.getElementById(`fixture-${trigger.dataset.storeObject}`);
-    const dialog = document.getElementById(trigger.getAttribute('aria-controls'));
+    const label = document.getElementById(trigger.getAttribute('aria-controls'));
     if (!fixture) continue;
-    if (dialog && typeof dialog.showModal !== 'function') continue;
     trigger.hidden = false;
     trigger.addEventListener('focus', () => {
       if (trigger.matches(':focus-visible')) fixture.classList.add('is-focused');
     });
     trigger.addEventListener('blur', () => fixture.classList.remove('is-focused'));
-    let feedbackTimer;
+    let timer;
     trigger.addEventListener('click', event => {
-      // Preserve modified clicks, open-in-new-tab, downloads and browser history.
       if (trigger.tagName === 'A' && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)) return;
       if (trigger.tagName === 'A') event.preventDefault();
-      clearTimeout(feedbackTimer);
+      const wasOpen = openTrigger === trigger;
+      close();
+      clearTimeout(timer);
       fixture.classList.remove('is-active');
-      // Restart only this small, finite object animation.
       void fixture.getBoundingClientRect();
       fixture.classList.add('is-active');
-      feedbackTimer = setTimeout(() => fixture.classList.remove('is-active'), 360);
-      if (dialog) {
-        if (dialog.open) dialog.close();
-        else dialog.showModal();
-      } else {
-        setTimeout(() => window.location.assign(trigger.href), reducedMotion.matches ? 0 : 220);
+      timer = setTimeout(() => fixture.classList.remove('is-active'), 450);
+      if (label && !wasOpen) {
+        openLabel = label; openTrigger = trigger;
+        trigger.setAttribute('aria-expanded', 'true');
+        label.hidden = false; position();
+      } else if (!label) {
+        setTimeout(() => location.assign(trigger.href), motionAllowed() ? 240 : 0);
       }
     });
-    if (!dialog) continue;
-    // Click the surrounding store to put the label back. Dragging from inside
-    // the paper never accidentally closes it.
-    let outsideDown = false;
-    const outside = event => {
-      const rect = dialog.getBoundingClientRect();
-      return event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom);
-    };
-    dialog.addEventListener('pointerdown', event => { outsideDown = outside(event); });
-    dialog.addEventListener('click', event => {
-      if (outsideDown && outside(event)) dialog.close();
-      outsideDown = false;
-    });
-    dialog.addEventListener('close', () => {
-      fixture.classList.remove('is-active');
-      trigger.focus({preventScroll:true});
-    });
   }
+  document.addEventListener('click', event => {
+    if (!event.target.closest('[data-store-object]')) close();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') close();
+  });
+  addEventListener('resize', position);
+  // Don't animate fixtures that are out of view, or an inactive browser tab.
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) entry.target.classList.toggle('is-away', !entry.isIntersecting);
+    }, {rootMargin:'80px'});
+    floor.querySelectorAll('svg > g[id^="fixture-"]').forEach(node => observer.observe(node));
+  }
+  const pause = () => document.documentElement.classList.toggle('store-paused', document.hidden);
+  document.addEventListener('visibilitychange', pause);
+  pause();
 })();

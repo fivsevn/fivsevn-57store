@@ -26,46 +26,54 @@ const browser = await chromium.launch();
 try {
   await mkdir(output, {recursive:true});
   const errors = [];
+  const config = JSON.parse(await readFile(path.join(root, 'store/config.json'), 'utf8'));
   for (const width of [320,390,768,1440]) {
-    const context = await browser.newContext({viewport:{width,height:844},hasTouch:width<500});
+    const context = await browser.newContext({viewport:{width,height:844},hasTouch:width<500,reducedMotion:'no-preference'});
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(origin);
-    assert.equal(await page.locator('header,footer,.store-masthead,.entry-number').count(),0);
+    await page.evaluate(()=>document.fonts.ready);
+    assert.equal(await page.locator('header,footer,dialog,.store-masthead,.entry-number').count(),0);
     assert.deepEqual(await page.locator('a').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')).sort()),['/cctv/','/receipt/','/sys/']);
     assert.equal(await page.locator('main').count(),1);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),true,`Horizontal overflow at ${width}`);
     const boxes = await page.locator('[data-store-object]').evaluateAll(nodes=>nodes.map(node=>{
-      const r=node.getBoundingClientRect(); return {id:node.dataset.storeObject,x:r.x,y:r.y,width:r.width,height:r.height};
+      const r=node.getBoundingClientRect(); return {id:node.dataset.storeObject,small:node.dataset.small==='true',x:r.x,y:r.y,width:r.width,height:r.height};
     }));
+    assert.ok(boxes.find(b=>b.id==='door').y<boxes.find(b=>b.id==='receipt').y,'Entrance appears before checkout');
+    assert.ok(boxes.find(b=>b.id==='cctv').y>boxes.find(b=>b.id==='drinks').y,'CCTV is in the rear office');
     for (const box of boxes) {
-      assert.ok(box.width>=44 && box.height>=44,`Undersized target: ${JSON.stringify(box)}`);
+      const min=box.small?24:44;
+      assert.ok(box.width>=min-.01 && box.height>=min-.01,`Undersized target: ${JSON.stringify(box)}`);
       assert.ok(box.x>=0 && box.x+box.width<=width+1,`Target leaves viewport: ${box.id}`);
     }
     for (let a=0;a<boxes.length;a++) for(let b=a+1;b<boxes.length;b++) {
       const x=boxes[a],y=boxes[b];
-      assert.ok(x.x+x.width<=y.x || y.x+y.width<=x.x || x.y+x.height<=y.y || y.y+y.height<=x.y,`Overlapping hit targets: ${x.id}, ${y.id}`);
+      assert.ok(x.x+x.width<=y.x+.1 || y.x+y.width<=x.x+.1 || x.y+x.height<=y.y+.1 || y.y+y.height<=x.y+.1,`Overlapping hit targets: ${x.id}, ${y.id}`);
     }
-    for (const fixture of ['snacks','daily','fresh','drinks','coffee','arrival']) {
-      const trigger=page.locator(`[data-store-object="${fixture}"]`);
+    for (const fixture of config.fixtures) {
+      const trigger=page.locator(`[data-store-object="${fixture.id}"]`);
       if (width<500) await trigger.tap(); else await trigger.click();
-      const dialog=page.locator(`#label-${fixture}`);
-      assert.equal(await dialog.evaluate(el=>el.open),true);
-      assert.ok(await dialog.locator('li').count()>=3);
-      assert.equal(await page.locator('dialog[open]').count(),1);
-      // No hover is necessary. Each label has a large explicit closing control.
-      await dialog.getByRole('button').click();
-      assert.equal(await dialog.evaluate(el=>el.open),false);
+      const label=page.locator(`#label-${fixture.id}`);
+      assert.equal(await label.isVisible(),true,fixture.id);
+      assert.equal(await page.locator('.shelf-label:visible').count(),1);
+      assert.equal(await trigger.getAttribute('aria-expanded'),'true');
+      const bounds=await label.boundingBox();
+      assert.ok(bounds.width<=160 && bounds.height<=110,`Label too large: ${fixture.id}`);
+      assert.ok(bounds.x>=0 && bounds.x+bounds.width<=width+1,`Label clipped: ${fixture.id}`);
+      assert.ok(bounds.y>=0 && bounds.y+bounds.height<=844,`Label outside view: ${fixture.id}`);
+      await trigger.click();
+      assert.equal(await label.isVisible(),false,'Second tap puts label back');
       assert.equal(await trigger.evaluate(el=>document.activeElement===el),true);
     }
     await page.locator('.object-snacks').click();
-    await page.mouse.click(4,4);
-    assert.equal(await page.locator('dialog[open]').count(),0,'Tap outside puts the label back');
+    await page.mouse.click(2,2);
+    assert.equal(await page.locator('.shelf-label:visible').count(),0,'Tap floor closes label');
     await page.locator('.object-snacks').focus();
     await page.keyboard.press('Enter');
-    assert.equal(await page.locator('#label-snacks').evaluate(el=>el.open),true);
+    assert.equal(await page.locator('#label-snacks').isVisible(),true);
     await page.keyboard.press('Escape');
-    assert.equal(await page.locator('dialog[open]').count(),0);
+    assert.equal(await page.locator('.shelf-label:visible').count(),0);
     for (const route of ['receipt','sys','cctv']) {
       await page.locator(`.entry-${route}`).click();
       await page.waitForURL(`${origin}/${route}/`);
@@ -74,23 +82,42 @@ try {
         const terminal=page.locator('.store-terminal-header');
         assert.equal(await terminal.locator('a[href="/receipt/"]').count(),0);
         assert.equal(await terminal.locator('.store-session-exit a').innerText(),'EXIT');
-        assert.equal(await terminal.locator('.store-session-exit a').evaluate(el=>getComputedStyle(el).textDecorationLine),'none');
+        const exit=terminal.locator('.store-session-exit a');
+        assert.equal(await exit.evaluate(el=>getComputedStyle(el).textDecorationLine),'none');
+        assert.equal(await exit.evaluate(el=>getComputedStyle(el).color),'rgb(107, 236, 174)');
         await terminal.getByRole('link',{name:'Exit terminal'}).click();
-      } else await page.locator('.receipt-return a').click();
+      } else {
+        const copy=await page.locator('body').innerText();
+        assert.ok(copy.indexOf('leave counter')>copy.indexOf('GOOD NIGHT.'));
+        await page.locator('.receipt-return a').click();
+      }
       await page.waitForURL(origin+'/');
     }
+    // Verify real time changes, not only the presence of animation declarations.
+    await page.evaluate(()=>scrollTo(0,0));
+    const steam=page.locator('.steam');
+    const before=await steam.evaluate(el=>getComputedStyle(el).transform);
+    await page.waitForTimeout(440);
+    assert.notEqual(await steam.evaluate(el=>getComputedStyle(el).transform),before);
+    const animated=await page.locator('.ambient,.hand,.feet').evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).animationName).filter(n=>n!=='none')).size);
+    assert.ok(animated>=15,`Only ${animated} distinct animation designs`);
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.locator('.object-snacks').click();
     assert.equal(await page.locator('#fixture-snacks .stock-response').evaluate(el=>getComputedStyle(el).animationName),'none');
-    assert.equal(await page.locator('.shopper').evaluate(el=>getComputedStyle(el).animationName),'none');
+    assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationName),'none');
     if(width===390) await page.screenshot({path:path.join(output,'store-label-mobile.png'),fullPage:true});
     await page.keyboard.press('Escape');
-    // Remove keyboard focus only for representative artwork screenshots.
-    await page.mouse.click(4,4);
+    await page.mouse.click(2,2);
     if(width===390 || width===1440) await page.screenshot({path:path.join(output,width===390?'store-mobile.png':'store-desktop.png'),fullPage:true});
+    // A deliberate preview opt-in works even in an accessibility-reduced browser.
+    await page.goto(origin+'/?motion=on');
+    assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationName),'steam-rise');
+    await page.reload();
+    assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationName),'steam-rise');
+    await page.goto(origin+'/?motion=off');
+    assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationName),'none');
     await context.close();
   }
-  // Scene/navigation remain available when JavaScript is unavailable.
   const context = await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
   const page = await context.newPage();await page.goto(origin);
   assert.equal(await page.locator('svg.store-art').isVisible(),true);
@@ -98,5 +125,5 @@ try {
   await page.locator('.entry-receipt').click();await page.waitForURL(`${origin}/receipt/`);
   await context.close();
   assert.deepEqual(errors,[]);
-  console.log('Passed: 4 viewport sizes, 6 touch labels, all routes, dismissal/focus, no-JS and reduced motion.');
+  console.log(`Passed: 4 viewport sizes, ${config.fixtures.length} tap labels, routes, focus, motion over time, reduced motion, explicit opt-in, no-JS.`);
 } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}

@@ -32,8 +32,8 @@ source_of_truth: site
 filename_policy: entrypoint
 
 created: null
-updated: '2026-11-05'
-metadata_updated: '2026-11-05'
+updated: '2026-11-07'
+metadata_updated: '2026-11-07'
 ---
 # 57store
 
@@ -111,8 +111,9 @@ Use the same `--base-path /fivsevn-57store` on build and check for a project-pat
 
 ## Store interior prototype
 
-The home page is the interior itself. Tap the receipt printer for `/receipt/`, the FS-57 terminal for `/sys/`, or the monitor for `/cctv/`. Shelf, cooler, coffee and arrival displays open physical-looking stock labels on click/tap; there is no hover interaction. Screen text moves briefly, the receipt paper feeds, and stock nudges in response. `prefers-reduced-motion` disables all movement and navigation delays. Keyboard focus illuminates the object itself. The three page links remain functional without JavaScript; shelf inspection is progressively enabled when dialog support is available.
+The home page is the interior itself, with the entrance at the top, public cross-aisles, front-window magazines, four differentiated gondolas, perimeter chilled food and an enclosed rear walk-in drink cooler with a real replenishment aisle. Tap the receipt printer for `/receipt/`, the FS-57 terminal for `/sys/`, or the computer on the rear office desk for `/cctv/`. The separate entrance camera is inspectable, not a second monitor.
 
+32 equipment/stock/people groups open tiny adjacent notes on tap or click; no modal sheet or hover interaction. The sign carries the three slogans. There is no instructional floor text. Twenty ambient motion designs include doors, equipment lighting, steam, paper, screen contents, people and the cold-room fan. Off-screen fixtures pause. `prefers-reduced-motion` disables movement and navigation delays by default; the explicit `?motion=on` preview option enables it for that tab session, and `?motion=off` clears that choice. The three page links work without JavaScript.
 The other existing routes (`/cache/`, `/fragment/`, `/toilet/`) remain available, without links from the interior. The terminal keeps its English-only `SESSION: [ EXIT ]` control and does not link to the receipt.
 
 See [store/README.md](store/README.md) for layout, authored product configuration and scene coordinates. No new runtime dependencies are needed. Browser checks require Node.js 22.13+ and use a development-only, pinned Playwright dependency:
@@ -125,6 +126,6 @@ python scripts/build.py
 pnpm test:browser
 ```
 
-Browser checks cover 320, 390, 768 and 1440 px widths, target sizes and overlaps, all three routes, touch labels, dismissal, keyboard focus, reduced motion and a disabled-JavaScript fallback. Screenshots are saved under ignored `test-results/`.
+Browser checks cover 320, 390, 768 and 1440 px widths, target sizes and overlaps, all three routes, touch labels, dismissal, keyboard focus, actual animation over time, reduced motion, its explicit preview opt-in and a disabled-JavaScript fallback. Screenshots are saved under ignored `test-results/`.
 
 **Review before publication:** branch/PR CI produces the complete `57store-site-preview` artifact plus browser screenshots. Download and serve it with `python -m http.server 8000 --directory PATH_TO_EXTRACTED_ARTIFACT`. Branch/PR checks do not deploy. Merging into `main` triggers the existing production Pages workflow; merge only after the visual review is approved.

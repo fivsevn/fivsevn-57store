@@ -1,30 +1,75 @@
 # Store interior
 
-The root `/` is a complete, original, portrait cutaway of the convenience store. Everything visible belongs to the room: signs are on fixtures, navigation is through devices, and inspection opens stock labels. Do not add a site masthead, explanatory captions, floating numbered markers, status dashboard or footer around the scene.
+`/` is an original portrait cutaway of 57STORE. Everything visible belongs to the shop. Do not add a masthead, site footer, instructional floor text, floating navigation markers or hover-only information.
 
-- `page.html`: semantic main/figure, three page entries and inspection controls.
-- `scene.py`: deterministic integer-coordinate SVG renderer. Edit the actual equipment and stock here. No remote assets or image-generation service is required.
-- `config.json`: the three allowed destinations and six authored product labels. These are fictional store contents, not live stock levels. Keep product descriptions consistent with the drawing.
-- `style.css`: layout, hit surfaces, physical label styling, object feedback and reduced motion.
-- `interactions.js`: click/tap/keyboard interaction. No hover handlers, tracking, API calls or runtime data fetches.
+## Sources and layout
 
-## Layout and movement
+The entrance is at the **top**, so a phone enters from the front and scrolls deeper into the shop. The counter is beside the entrance, with a short bounded cashier workspace. Magazines face the front window; umbrellas and baskets stay to its side. Four central gondolas have front, middle and rear cross-aisles. Both side aisles are public. Coffee and waste sorting are separate from chilled dairy and the sliding-lid ice-cream freezer. Rice balls, sandwiches and bentos sit in open chilled cases along the opposite perimeter.
 
-The entrance is at the front/bottom. Customers have a clear entrance apron and can move through a front cross-aisle, along either side of the two double-sided gondolas, and across the rear drink aisle. The checkout queue stays to the left of the entrance. Fresh food runs along the right wall. The rear room contains replenishment stock, a sink, lockers and an office; the left staff passage connects it to the rear of the counter without crossing the queue. Appliances sit behind the cashier, with the hot-food display on the counter. The SYS station is accessible from the front public aisle.
+The drink display at the rear is a **walk-in cooler**, not a shallow cabinet pushed against an arbitrary wall. Behind its glass doors there are rear-access stock racks, an open replenishment aisle, boxed pre-chilled drinks and a circulating-air unit. A thick insulated swing door connects this room to the back stock room. The staff entrance opens from the public rear cross-aisle. The office desk is separated by a short wall with a doorway; its computer is the CCTV entry. The small camera above the front window is only a camera.
 
-Reference: [Seven & i — store layout and merchandising](https://www.7andi.com/company/challenge/2751/2.html) discusses wider checkout circulation and grouping daily/chilled food. This is an original compact layout informed by those circulation principles, not a reproduction of that plan or the supplied style reference.
+This is a compact fictional store, not a construction drawing or a traced floor plan. Equipment types and circulation were checked against:
 
-The scene uses a `640 × 1040` authoring coordinate system and a cropped `viewBox="26 26 586 924"`. A position `(x, y)` maps to `left=(x−26)/586`, `top=(y−26)/924`. The desktop scene width is capped at 780 CSS pixels. Narrow screens scale proportionately, scroll normally and retain at least 44 × 44 CSS pixel hit areas. Recheck overlap whenever equipment or hit positions change.
+- [Seven & i: store layout and merchandising](https://www.7andi.com/company/challenge/2751/2.html) — checkout circulation and grouped chilled/daily food.
+- [Convenience Store Walker: photographed store renovation and before/after plans](https://cvs.main.jp/pictures/seven_layout_newformat/) — first-hand reference for front-window magazines, checkout, perimeter cases and open customer aisles; individual stores and generations differ.
+- [Fukushima Galilei convenience-store equipment catalogue, pp. 38–39, hosted by distributor Fixwell](https://www.fixwell.com.hk/cfolder/fixwell/Library/Tree/04_PRODUCTS/01_REFRIGERATION/01_FUKUSHIMA_GALILEI/FIXWELL_-_Galilei_CV_v25.pdf) — open cases versus glass-door walk-in rooms, rear replenishment and reserve pre-cooling space.
+- [Panasonic showcase product types](https://panasonic.co.jp/hvac-cc/biz/products/cold-chain/showcase/) — distinguish open chilled cases, reach-in cases and chest freezers.
+- [Saint11: pixel clusters](https://saint11.art/pixel_art_articles/article2/), [shading](https://saint11.art/pixel_art_articles/article4/) and [animation timing](https://saint11.art/pixel_art_articles/article3/) — coherent silhouettes, limited colour clusters, consistent hard-edged light and stepped motion with pauses.
 
-## Interactions
+References inform the design; no reference photos, floor plans, tutorials or third-party sprites are shipped. The original drawing, palette adaptations, goods and motion are authored here. All three brand slogans are printed on the physical glazing transom. The floor and entrance mat carry no explanatory text.
 
-- Printer, terminal and monitor are ordinary anchors. Unmodified clicks allow 220 ms of physical feedback before navigating; modifier clicks retain browser behavior. Reduced motion navigates immediately.
-- Shelf and cooler controls show a native dialog styled as a printed store label. Close via the × button, Escape or a tap outside the paper. Focus returns to the inspected object. They never create routes to other modules.
-- Screen feedback moves the screen contents. Printer feedback moves the paper. Shelf feedback moves goods, with no rectangular hover/click outline. Keyboard focus highlights the actual fixture.
-- The single ambient shopper moves only within the center aisle. No clocks, live shifts or stock events are inferred from repository data in this prototype.
+## Module files
 
-## Verify
+- `page.html`: semantic main, figure, three destinations, invisible descriptive alternative.
+- `scene.py`: deterministic, layered, integer-coordinate SVG. Coordinate space is **640 × 1500**; no runtime renderer, external art service, framework or fetch.
+- `config.json`: 3 route anchors and 32 compact inspection notes with authored hit areas. Descriptions represent fictional stock, not live inventory.
+- `style.css`: room scaling, in-world feedback, compact notes and motion.
+- `interactions.js`: tap/click/keyboard, note positioning and visibility-aware animation pausing.
 
-From the repository root, run the documented Python checks and `pnpm test:browser` after building. The latter starts and stops its own local server. It writes desktop/mobile screenshots plus an opened stock-label screenshot to `test-results/`. `STORE_SCREENSHOTS` can point to another output directory; `STORE_SITE_DIR` selects an existing build outside `_site/`. On synced desktop folders, use an output under `/tmp` to avoid sync-conflict copies during rebuilds.
+The desktop width is capped at 800 CSS pixels. Mobile scales proportionally and scrolls vertically. Primary equipment/routes use at least 44 × 44 CSS pixel targets at 320px; five small props/people have at least 24px targets and do not overlap neighbouring controls. Keep bounds consistent with artwork. Related small items such as the sink/stock rack, lockers/clock and cooler fan/reserve crates share an inspection area.
 
-Changing store files does not change the original receipt or the retained archive styles. Production remains controlled by the existing main-branch deployment workflow.
+## Interaction and animation
+
+Inspection shows a **154px-wide non-modal note** beside the object, with one title and one short sentence. No overlay, inventory sheet, close button, focus trap or hover state. Tap again, tap elsewhere or press Escape to close. All 32 notes can be reached by keyboard. The receipt printer, SYS terminal and office CCTV computer remain ordinary links. Unmodified clicks briefly move paper or screen content before navigation; modified/new-tab clicks retain browser behavior. Keyboard focus illuminates the actual object rather than drawing a hit-box outline.
+
+The motion designs are independent and deliberately unsynchronised:
+
+1. Automatic door leaves slide into the side glazing.
+2. Transom light subtly changes intensity.
+3. Hot-food case light cycles gently.
+4. Microwave display changes brightness.
+5. Checkout display advances a line.
+6. Printer paper feeds a few pixels.
+7. Coffee steam rises and dissipates.
+8. Entrance camera turns slightly on its bracket.
+9. SYS screen types successive lines.
+10. Fresh-case lights breathe softly.
+11. Case glass catches a moving reflection.
+12. Freezer edge light and ice reflection shift.
+13. Drink-case lighting and door reflections vary.
+14. Shopper walks within the central aisle with stepped feet.
+15. Magazine reader turns a page.
+16. Cashier moves a hand over the counter.
+17. Rear worker reaches towards replenishment stock.
+18. Cooler circulation fan rotates.
+19. Office monitor scan line moves across its own screen.
+20. Staff clock hand ticks.
+
+A tapped shelf nudges its goods; a tapped screen advances its contents. CSS animates only small transforms/opacity regions. Off-screen fixtures and hidden tabs pause. No audio, network animation loop, GPU blur, video background or analytics.
+
+`prefers-reduced-motion: reduce` disables all movement and link delays by default. For a **deliberately requested animated preview**, `?motion=on` enables motion in this tab and remembers it for that tab session; `?motion=off` clears the override. This exists because the desktop preview browser can inherit reduced motion. No global browser or OS setting is changed. Without JavaScript the complete illustration and all three destination links still work.
+
+## Verification and review
+
+Run the root README's Python checks and `pnpm test:browser` after building. Browser checks cover 320/390/768/1440px, every inspection note, all routes, target collisions, card bounds, keyboard dismissal, actual movement over time, reduced motion, the explicit opt-in and no-JS navigation. They capture mobile, desktop and opened-note previews.
+
+`STORE_SCREENSHOTS` selects the screenshot directory; `STORE_SITE_DIR` selects the existing built output. In synced desktop folders use an output under `/tmp` to avoid sync-conflict copies:
+
+```sh
+python scripts/build.py --output /tmp/57store-preview
+python scripts/check.py --output /tmp/57store-preview
+STORE_SITE_DIR=/tmp/57store-preview pnpm test:browser
+python -m http.server 8057 --bind 127.0.0.1 --directory /tmp/57store-preview
+```
+
+The branch and draft PR are for review. CI produces an offline site artifact and browser screenshots. Production publication is still controlled by the existing main-branch workflow; do not merge until the user approves the visual result.

@@ -1,57 +1,80 @@
-/* The interior owns its entire surface; archived pages keep their shared frame. */
+/* A room, without a site header, footer, floating navigation or hover UI. */
 @font-face{font-family:Store Mono;src:url('/site-assets/fonts/u-450q2lgwslOqpF_6gQ8kELWwNjW-_-tvg.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
-@font-face{font-family:Store Mono;src:url('/site-assets/fonts/u-4k0q2lgwslOqpF_6gQ8kELY7pMf-LVqvHoJXw.woff2') format('woff2');font-style:normal;font-weight:700;font-display:swap}
-:root{color-scheme:dark;--mint:#50efc2;--paper:#d8e2dc;--muted:#92a59b;--line:#2b3b35}
+:root{color-scheme:dark;--mint:#50efc2;--paper:#dce7d5}
 *{box-sizing:border-box}
-html{background:#0b1412;scroll-behavior:smooth}
-body{margin:0;color:var(--paper);font-family:Store Mono,ui-monospace,"SFMono-Regular",monospace;background:#0b1412}
-.store-shell{width:min(100%,780px);margin:auto}
-figure{margin:0}
+html{background:#101b1a;scroll-behavior:smooth}
+body{margin:0;background:#101b1a;color:var(--paper);font-family:Store Mono,ui-monospace,monospace}
+.store-shell{width:min(100%,800px);margin:auto}
 .store-floor{position:relative;margin:0;isolation:isolate}
-.store-art{display:block;width:100%;height:auto;overflow:visible}
-/* The clickable surfaces belong to the devices themselves. No floating UI. */
-.store-entry{position:absolute;display:block;min-width:44px;min-height:44px;border:0;scroll-margin:30px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.entry-receipt{left:29.7%;top:79.9%;width:13%;height:8.6%}
-.entry-sys{left:82.2%;top:74.7%;width:13.2%;height:12.2%}
-.entry-cctv{left:80.9%;top:26.7%;width:15%;height:8.4%}
-.store-entry:focus-visible{outline:0}
+.store-art{display:block;width:100%;height:auto}
+.store-entry,.store-object{position:absolute;display:block;min-width:44px;min-height:44px;margin:0;padding:0;border:0;background:none;appearance:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;scroll-margin:100px}
+.store-entry:focus-visible,.store-object:focus-visible{outline:none}
 .store-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-.shopper{animation:browse 24s ease-in-out infinite}
-.status-light{animation:monitor 7s steps(1,end) infinite}
-@keyframes browse{0%,20%,100%{transform:translateY(0)}45%,75%{transform:translateY(38px)}}
-@keyframes monitor{0%,93%,100%{opacity:1}94%,98%{opacity:.35}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.shopper,.status-light{animation:none}.store-entry{transition:none}}
-
-/* Hit surfaces stay invisible. Feedback lives in the illustration. */
-.store-object{position:absolute;display:block;min-width:44px;min-height:44px;padding:0;border:0;background:none;appearance:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.store-object[hidden]{display:none}
-.store-object:focus-visible{outline:0}
-.object-drinks{left:23.5%;top:17.1%;width:71%;height:9%}
-.object-snacks{left:29%;top:34.8%;width:15%;height:29.5%}
-.object-daily{left:57.5%;top:36%;width:15.2%;height:28.5%}
-.object-fresh{left:83.5%;top:35.8%;width:12%;height:33%}
-.object-coffee{left:5.5%;top:69.3%;width:16%;height:9%}
-.object-arrival{left:60%;top:72%;width:13%;height:6.5%}
-/* Keyboard focus is drawn on the actual sign or goods, never a UI rectangle. */
-.is-focused text{fill:#fff;text-decoration:underline;text-decoration-style:dotted}
-.is-focused{filter:drop-shadow(0 0 2px #d8ffeb)}
-.is-active .screen-response{animation:screen-type .3s steps(3,end)}
-.is-active .paper-response{animation:paper-feed .32s steps(4,end)}
-.is-active .stock-response{animation:stock-nudge .3s ease-out}
-#fixture-drinks.is-active,#fixture-fresh.is-active,#fixture-coffee.is-active,#fixture-arrival.is-active{animation:stock-nudge .3s ease-out}
-@keyframes screen-type{0%{transform:translateY(0)}35%{transform:translateY(-3px);opacity:.5}70%{transform:translateY(2px);opacity:1}100%{transform:translateY(0)}}
-@keyframes paper-feed{0%{transform:translateY(0)}45%,80%{transform:translateY(5px)}100%{transform:translateY(0)}}
-@keyframes stock-nudge{0%,100%{transform:translateY(0)}35%{transform:translateY(-2px)}70%{transform:translateY(1px)}}
-.shelf-label{width:min(310px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;margin:auto;padding:20px 22px 18px;border:3px solid #859e8d;background:#d3ddd1;color:#1a3026;box-shadow:5px 6px 0 #09150f88;font-family:Store Mono,monospace;outline:0}
-.shelf-label::backdrop{background:#07120d38}
-.label-code{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px dashed #68816f;font-size:11px;letter-spacing:.07em}
-.label-code form{margin:0}
-.label-code button{width:44px;height:44px;border:0;background:none;color:#1a3026;font:24px Store Mono,monospace;cursor:pointer}
-.label-code button:focus-visible{outline:2px dotted #315e49;outline-offset:-6px}
-.shelf-label h2{font-size:22px;font-weight:400;letter-spacing:.08em;margin:22px 0 10px}
-.label-subtitle{font-size:10px;line-height:1.7;margin:0;color:#3c5947}
-.shelf-label ul{list-style:none;padding:8px 0;margin:12px 0;border-top:1px solid #869b89;border-bottom:1px solid #869b89}
-.shelf-label li{padding:9px 0;font-size:13px;line-height:1.4}
-.label-note{font-size:11px;line-height:1.8;margin:15px 0 19px}
-.label-barcode{height:20px;width:88px;opacity:.6;background:repeating-linear-gradient(90deg,#203d2a 0 2px,transparent 2px 4px,#203d2a 4px 5px,transparent 5px 8px)}
-@media(prefers-reduced-motion:reduce){.store-floor .is-active,.store-floor .is-active *{animation:none!important}}
+[hidden]{display:none!important}
+/* Keyboard feedback follows the artwork rather than a rectangular hit area. */
+.is-focused{filter:drop-shadow(0 0 3px #c8ffe1)}
+.shelf-label{position:absolute;z-index:5;width:154px;max-width:calc(100% - 16px);padding:9px 11px;border:1px solid #799b81;background:#d8e2cf;color:#17392a;box-shadow:3px 3px 0 #0b1c16b8;pointer-events:none;font-family:Store Mono,ui-monospace,monospace;line-height:1.6}
+.shelf-label strong{display:block;font-size:12px;font-weight:700;margin-bottom:3px}
+.shelf-label span{display:block;font-size:11px}
+/* Deliberately separate timings: a working shop, not synchronized blinking. */
+.sign-light{animation:sign-breathe 8s ease-in-out infinite -3s}
+.door-left{animation:door-left 19s steps(12,end) infinite -2s}
+.door-right{animation:door-right 19s steps(12,end) infinite -2s}
+.warmer-light{animation:heat-cycle 6.7s ease-in-out infinite -2s}
+.microwave{animation:display-cycle 4.7s steps(1,end) infinite}
+.pos-display{animation:pos-line 5.3s steps(2,end) infinite -1s}
+.printer{animation:paper-idle 13s steps(5,end) infinite -2s}
+.steam{animation:steam-rise 2.8s steps(7,end) infinite}
+.camera-swivel{animation:camera-turn 16s steps(4,end) infinite -5s;transform-box:fill-box;transform-origin:80% 50%}
+.terminal-type{animation:typing 2.7s steps(5,end) infinite;transform-box:fill-box;transform-origin:left}
+.case-light{animation:case-breathe 7s ease-in-out infinite -3s}
+.glass-light{animation:glass-pass 9s steps(10,end) infinite -2s}
+.freezer-light{animation:case-breathe 9s ease-in-out infinite -5s}
+.freezer-reflection{animation:ice-light 6s steps(6,end) infinite -1s}
+.drinks-light{animation:case-breathe 8s ease-in-out infinite -4s}
+.drink-reflection{animation:glass-pass 11s steps(10,end) infinite -3s}
+.shopper{animation:shopper-walk 16s steps(36,end) infinite}
+.shopper .feet{animation:footstep .7s steps(2,end) infinite}
+.reader .hand{animation:turn-page 5s steps(3,end) infinite -1s}
+.clerk .hand{animation:checkout 4.3s steps(4,end) infinite}
+.restocker .hand{animation:restock 4s steps(4,end) infinite -1s}
+.fan-spin{animation:fan-turn 2.4s steps(8,end) infinite;transform-origin:0 0}
+.cctv-scan{animation:scan 3.7s steps(12,end) infinite}
+.clock-hand{animation:clock-tick 60s steps(60,end) infinite;transform-origin:0 0}
+.is-away .ambient,.is-away .hand,.is-away .feet,.store-paused .ambient,.store-paused .hand,.store-paused .feet{animation-play-state:paused}
+.is-active .screen-response{animation:screen-wake .4s steps(4,end)}
+.is-active .paper-response{animation:paper-feed .4s steps(4,end)}
+.is-active .stock-response,.is-active:not(:has(.screen-response,.paper-response,.stock-response)){animation:stock-nudge .4s steps(4,end)}
+@keyframes sign-breathe{0%,100%{opacity:1}50%{opacity:.76}}
+@keyframes door-left{0%,18%{transform:translateX(-64px)}25%,88%,100%{transform:translateX(0)}}
+@keyframes door-right{0%,18%{transform:translateX(64px)}25%,88%,100%{transform:translateX(0)}}
+@keyframes heat-cycle{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes display-cycle{0%,65%,100%{opacity:1}66%,85%{opacity:.55}}
+@keyframes pos-line{0%,70%,100%{transform:translateY(0)}75%,90%{transform:translateY(-2px)}}
+@keyframes paper-idle{0%,30%,100%{transform:translateY(0)}8%,25%{transform:translateY(6px)}}
+@keyframes steam-rise{0%{opacity:.2;transform:translate(0,4px)}35%{opacity:.75}100%{opacity:0;transform:translate(3px,-14px)}}
+@keyframes camera-turn{0%,35%,100%{transform:rotate(0deg)}55%,80%{transform:rotate(8deg)}}
+@keyframes typing{0%,10%{transform:scaleX(.2)}70%,100%{transform:scaleX(1)}}
+@keyframes case-breathe{0%,100%{opacity:.9}50%{opacity:.55}}
+@keyframes glass-pass{0%,100%{transform:translateX(0);opacity:.5}50%{transform:translateX(4px);opacity:1}}
+@keyframes ice-light{0%,100%{opacity:.5}50%{opacity:1;transform:translateY(4px)}}
+@keyframes shopper-walk{0%,100%{transform:translateY(0)}42%,60%{transform:translateY(80px)}}
+@keyframes footstep{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes turn-page{0%,55%,100%{transform:translate(0,0)}65%,85%{transform:translate(7px,-5px)}}
+@keyframes checkout{0%,60%,100%{transform:translate(0,0)}20%,45%{transform:translate(9px,5px)}}
+@keyframes restock{0%,100%{transform:translate(0,0)}30%,70%{transform:translate(-8px,-11px)}}
+@keyframes fan-turn{to{transform:rotate(360deg)}}
+@keyframes scan{from{transform:translateY(0)}to{transform:translateY(25px)}}
+@keyframes clock-tick{to{transform:rotate(360deg)}}
+@keyframes screen-wake{0%,100%{transform:translateY(0)}30%{transform:translateY(-3px);opacity:.5}65%{transform:translateY(2px)}}
+@keyframes paper-feed{0%,100%{transform:translateY(0)}40%,80%{transform:translateY(7px)}}
+@keyframes stock-nudge{0%,100%{transform:translateY(0)}35%{transform:translateY(-3px)}70%{transform:translateY(1px)}}
+/* Respect the device preference. Only an explicit per-tab preview opt-in
+   (?motion=on) overrides it; ?motion=off clears that choice. */
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}html:not(.motion-enabled) .store-floor *{animation:none!important}}
+/* Minor props have 24px minimum targets; primary fixtures and routes retain
+   44px targets. Their touch areas never cover a neighbour. */
+.store-object[data-small="true"]{min-width:24px;min-height:24px}
+#fixture-fresh .case-light{animation-delay:-1s}
+#fixture-bento .case-light{animation-delay:-4.5s}
+#fixture-dairy .case-light{animation-delay:-6s}
