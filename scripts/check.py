@@ -23,11 +23,17 @@ def check(root=ROOT, output=None, base_path=''):
     manifest=json.loads((root/'site-data/content.json').read_text());posts=load_posts(root)
     stats={'revisions':store_revisions(root),'receipts':sum(is_published(p['meta']) for values in posts.values() for p in values)}
     if receipt.get('store_stats')!=stats:errors.append('Store statistics differ from current Git history or public content')
-    home=BeautifulSoup((out/'index.html').read_text(),'html.parser')
+    home=BeautifulSoup((out/'receipt/index.html').read_text(),'html.parser')
     for key,unit in [('revisions','entries'),('receipts','receipts')]:
         slots=home.select(f'[data-store-stat="{key}"]')
         if len(slots)!=1 or slots[0].get_text(strip=True)!=f'{stats[key]:,} {unit}':
-            errors.append('Wrong homepage statistic: '+key)
+            errors.append('Wrong receipt statistic: '+key)
+    storefront=BeautifulSoup((out/'index.html').read_text(),'html.parser')
+    if sorted(a.get('href') for a in storefront.select('a[href]'))!=sorted(base+route for route in ('/receipt/','/sys/','/cctv/')):
+        errors.append('Store must open exactly receipt, sys and cctv')
+    if not storefront.select_one('svg.store-art') or not storefront.select_one('main'):
+        errors.append('Missing store interior')
+    if (root/'templates/home.html').exists():errors.append('Receipt source was not moved')
     for board,retained in manifest.get('retained_posts',{}).items():
         present={p['meta']['id'] for p in posts[board]}
         if not set(retained)<=present:errors.append('Retained archive records are missing: '+board)

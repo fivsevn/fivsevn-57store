@@ -39,13 +39,14 @@ metadata_updated: '2026-11-05'
 
 [System map](https://github.com/fivsevn-agy/fivsevn-devlog/blob/main/system-map.md)
 
-Source for [57store.fivsevn.com](https://57store.fivsevn.com/), a narrative extension of [fivsevn.com](https://fivsevn.com/). A deterministic Python build preserves the receipt, terminal, camera-monitor and conversation layouts while keeping content in editable source files. The site deploys to GitHub Pages.
+Source for [57store.fivsevn.com](https://57store.fivsevn.com/), a narrative extension of [fivsevn.com](https://fivsevn.com/). A deterministic Python build renders an original portrait pixel convenience-store interior and preserves the receipt, terminal, camera-monitor and conversation layouts. All visible homepage content belongs to the store itself: there is no surrounding site header, footer or floating navigation. The site deploys to GitHub Pages.
 
 ## Pages and source
 
 | Public route | Editable source | Purpose |
 |---|---|---|
-| `/` | `templates/home.html` | Night-store receipt and navigation |
+| `/` | `store/page.html`, `store/scene.py`, `store/config.json` | Portrait convenience-store interior |
+| `/receipt/` | `receipt/page.html` | Original night-store receipt |
 | `/fragment/` | `fragment/page.html` | Independent image page |
 | `/cache/` | `cache/page.html`, `cache/posts.json` | Continuous conversation with an inline access prompt |
 | `/sys/` | `sys/YYYY/MM/<id>/index.md` | Terminal log; newest first |
@@ -53,9 +54,9 @@ Source for [57store.fivsevn.com](https://57store.fivsevn.com/), a narrative exte
 | `/toilet/` | `toilet/` | Existing interactive room |
 | `/pi5/57store/system/static/` | `pi5/57store/system/static/`, sibling `data/` | Existing terminal prototype |
 
-Receipt layout and labels are editable in `templates/home.html`. Two counters are calculated during every build: **STORE LOG / 店务记录** displays one entry per commit reachable from the checked-out Git revision, including automated publication commits; **RECEIPTS PRINTED / 累计出单** counts published, public SYS and CCTV entries. Cache messages, drafts and hidden entries are excluded. Statistics are generated only in the build output and require a complete Git checkout (`git fetch --unshallow` for a shallow clone). The existing push and scheduled deployments refresh both values without a visitor-tracking service.
+Receipt layout and labels are editable in `receipt/page.html`; its dedicated styles and icons live in `receipt/`. Two counters are calculated during every build: **STORE LOG / 店务记录** displays one entry per commit reachable from the checked-out Git revision, including automated publication commits; **RECEIPTS PRINTED / 累计出单** counts published, public SYS and CCTV entries. Cache messages, drafts and hidden entries are excluded. Statistics are generated only in the build output and require a complete Git checkout (`git fetch --unshallow` for a shallow clone). The existing push and scheduled deployments refresh both values without a visitor-tracking service.
 
-CCTV artwork, the signed shortcut, boot capsule, room assets and Raspberry Pi application remain available for their existing uses. The website homepage is built from `templates/home.html`. The static Pi prototype retains its seeded fallbacks; its Flask `/api/` services still require the separate Pi application.
+CCTV artwork, the signed shortcut, boot capsule, room assets and Raspberry Pi application remain available for their existing uses. The website homepage is built from `store/`; the old receipt source has been moved, with no old-home template or compatibility route. The static Pi prototype retains its seeded fallbacks; its Flask `/api/` services still require the separate Pi application.
 
 ## Publish and edit
 
@@ -71,7 +72,7 @@ Saved SYS/CCTV posts use the shared [site-post profile](https://github.com/fivse
 
 CI and deployment read the fixed Spec revision from [.github/spec-ref](.github/spec-ref); upgrade that pin together with both local helpers and both schemas.
 
-Publication images follow the [media naming contract](https://github.com/fivsevn-agy/fivsevn-spec/blob/main/content/spec-content-media-naming-001.md). Reused icons, artwork and fonts retain their names under `site-assets/`. Package IDs and image numbers remain stable when titles or display order change.
+Publication images follow the [media naming contract](https://github.com/fivsevn-agy/fivsevn-spec/blob/main/content/spec-content-media-naming-001.md). Module-specific icons and artwork retain their names and original bytes in each module’s `assets/` directory. Only shared fonts, the legacy frame styles, terminal styles and the site sharing image remain under `site-assets/`. Package IDs and image numbers remain stable when titles or display order change.
 
 ## Build and deployment
 
@@ -98,10 +99,32 @@ Use the same `--base-path /fivsevn-57store` on build and check for a project-pat
 
 | Directory | Responsibility |
 |---|---|
-| `templates/`, `site-assets/` | Layout, styles, fonts and shared images |
+| `templates/`, `site-assets/` | Shared frame/header, legacy base styles, terminal styles, fonts and site sharing image |
+| `store/` | Scene renderer, page, object labels, interaction script and styles |
+| `receipt/` | Original receipt page, styles and icons |
 | `site-data/` | Channel configuration, retained content identities and asset checksums |
-| `sys/`, `cctv/` | Publishing guides and dated content packages |
-| `fragment/`, `cache/` | Independent page sources |
+| `sys/`, `cctv/` | Their own page/card templates, publishing guides and dated content packages |
+| `fragment/`, `cache/` | Independent page/card sources, styles, scripts and assets |
 | `.publishing/` | Durable SYS event ledger |
 | `scripts/`, `schemas/`, `tests/` | Import, synchronization, build and verification |
 | `_site/` | Disposable build artifact; never edit or commit |
+
+## Store interior prototype
+
+The home page is the interior itself. Tap the receipt printer for `/receipt/`, the FS-57 terminal for `/sys/`, or the monitor for `/cctv/`. Shelf, cooler, coffee and arrival displays open physical-looking stock labels on click/tap; there is no hover interaction. Screen text moves briefly, the receipt paper feeds, and stock nudges in response. `prefers-reduced-motion` disables all movement and navigation delays. Keyboard focus illuminates the object itself. The three page links remain functional without JavaScript; shelf inspection is progressively enabled when dialog support is available.
+
+The other existing routes (`/cache/`, `/fragment/`, `/toilet/`) remain available, without links from the interior. The terminal keeps its English-only `SESSION: [ EXIT ]` control and does not link to the receipt.
+
+See [store/README.md](store/README.md) for layout, authored product configuration and scene coordinates. No new runtime dependencies are needed. Browser checks require Node.js 22.13+ and use a development-only, pinned Playwright dependency:
+
+```sh
+npm install --global pnpm@11.25.0
+pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
+python scripts/build.py
+pnpm test:browser
+```
+
+Browser checks cover 320, 390, 768 and 1440 px widths, target sizes and overlaps, all three routes, touch labels, dismissal, keyboard focus, reduced motion and a disabled-JavaScript fallback. Screenshots are saved under ignored `test-results/`.
+
+**Review before publication:** branch/PR CI produces the complete `57store-site-preview` artifact plus browser screenshots. Download and serve it with `python -m http.server 8000 --directory PATH_TO_EXTRACTED_ARTIFACT`. Branch/PR checks do not deploy. Merging into `main` triggers the existing production Pages workflow; merge only after the visual review is approved.

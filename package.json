@@ -1,0 +1,15 @@
+{
+  "name": "57store-browser-checks",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "test:cache": "node --test tests/test_cache_reveal.mjs",
+    "test:browser": "node tests/test_store_browser.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

@@ -40,3 +40,9 @@ env/
 # Website build
 _site/
 .metadata-spec/
+
+# Browser verification (development only)
+node_modules/
+test-results/
+
+_site-prefixed/

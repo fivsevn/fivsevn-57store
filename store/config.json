@@ -1,0 +1,101 @@
+{
+  "entries": [
+    {
+      "id": "receipt",
+      "href": "/receipt/",
+      "label": "小票",
+      "subtitle": "RECEIPT"
+    },
+    {
+      "id": "sys",
+      "href": "/sys/",
+      "label": "店务终端",
+      "subtitle": "SYS / FS-57"
+    },
+    {
+      "id": "cctv",
+      "href": "/cctv/",
+      "label": "监控记录",
+      "subtitle": "CCTV"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "drinks",
+      "code": "C-01",
+      "name": "冷藏饮料",
+      "subtitle": "COLD DRINKS / 冷蔵飲料",
+      "items": [
+        "矿泉水 · 炭酸水",
+        "绿茶 · 乌龙茶",
+        "罐装咖啡",
+        "鲜牛奶 · 乳酸菌饮料"
+      ],
+      "note": "取用后请随手关好冷柜门。"
+    },
+    {
+      "id": "snacks",
+      "code": "A-01",
+      "name": "零食货架",
+      "subtitle": "SNACKS / お菓子",
+      "items": [
+        "海盐薯片",
+        "米饼 · 仙贝",
+        "巧克力 · 饼干",
+        "薄荷糖 · 口香糖"
+      ],
+      "note": "小包装在上层，分享装在下层。"
+    },
+    {
+      "id": "daily",
+      "code": "A-02",
+      "name": "日常补给",
+      "subtitle": "DAILY / 日用品・食品",
+      "items": [
+        "杯面 · 即食汤",
+        "面包 · 小蛋糕",
+        "纸巾 · 湿巾",
+        "洗漱用品"
+      ],
+      "note": "也许只是来买一包纸巾。"
+    },
+    {
+      "id": "fresh",
+      "code": "C-02",
+      "name": "鲜食冷柜",
+      "subtitle": "FRESH / おにぎり・お弁当",
+      "items": [
+        "海苔饭团",
+        "三明治",
+        "便当 · 沙拉",
+        "布丁 · 酸奶"
+      ],
+      "note": "需要加热，请交给收银台的店员。"
+    },
+    {
+      "id": "coffee",
+      "code": "R-01",
+      "name": "柜台热食",
+      "subtitle": "COUNTER / コーヒー・ホットスナック",
+      "items": [
+        "热咖啡",
+        "炸鸡块",
+        "可乐饼",
+        "加热服务"
+      ],
+      "note": "咖啡机正在保温。"
+    },
+    {
+      "id": "arrival",
+      "code": "A-03",
+      "name": "本日到货",
+      "subtitle": "NEW ARRIVAL / 本日の入荷",
+      "items": [
+        "抹茶夹心饼干",
+        "海苔脆片",
+        "小袋混合坚果"
+      ],
+      "note": "刚刚摆上货架。"
+    }
+  ]
+}

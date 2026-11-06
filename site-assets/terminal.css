@@ -76,3 +76,5 @@ html.store-terminal-root { scrollbar-gutter: stable both-edges; }
 .wp-block-query-pagination a { text-decoration: underline; text-underline-offset: 1px; }
 .wp-block-query-pagination .pager-arrow { text-decoration: none; }
 .wp-block-query-pagination a:hover { text-decoration: none; }
+
+.store-session-exit{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:10px}.store-session-exit a{text-decoration:none}

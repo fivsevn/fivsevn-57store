@@ -19,10 +19,12 @@ from site_post_metadata import normalize_metadata,dump_frontmatter
 class BuildTests(unittest.TestCase):
     def setUp(self):
         self.temporary=tempfile.TemporaryDirectory();self.addCleanup(self.temporary.cleanup);self.root=Path(self.temporary.name)
-        for folder in ['templates','schemas','site-assets']:
+        for folder in ['templates','schemas','site-assets','store','receipt','cache','fragment']:
             shutil.copytree(ROOT/folder,self.root/folder)
-        (self.root/'cache').mkdir();shutil.copyfile(ROOT/'cache/page.html',self.root/'cache/page.html')
-        (self.root/'fragment').mkdir();shutil.copyfile(ROOT/'fragment/page.html',self.root/'fragment/page.html')
+        for board in ('sys','cctv'):
+            (self.root/board).mkdir()
+            for name in ('page.html','card.html'):
+                shutil.copyfile(ROOT/board/name,self.root/board/name)
         (self.root/'site-data').mkdir();(self.root/'site-data/content.json').write_text(json.dumps({'retained_posts':{},'assets':[]}))
         (self.root/'cache/posts.json').write_text(json.dumps([{'title':'cache','published_at':f'2026-06-08T18:{n:02d}:00+08:00','body_html':f'<p>message {n}</p>'} for n in range(11)]))
         (self.root/'toilet/assets').mkdir(parents=True);(self.root/'toilet/index.html').write_text('<img src="assets/original.png">');(self.root/'toilet/assets/original.png').write_bytes(b'preserved image')
@@ -171,7 +173,7 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(form['method'],'dialog')
         self.assertTrue(reply.has_attr('hidden'));self.assertEqual(reply.a['href'],'https://fivsevn.com/')
         self.assertFalse(item.select('time'))
-        self.assertTrue(page.select_one('script[src*="/site-assets/cache.js"]'))
+        self.assertTrue(page.select_one('script[src*="/cache/reveal.js"]'))
         self.assertEqual(receipt['counts']['cache'],11)
 
     def test_new_sys_plain_two_line_entry_keeps_its_line_break(self):
@@ -205,9 +207,39 @@ class BuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Store statistics differ'):check(self.root)
         final=build(self.root);check(self.root)
         self.assertEqual(final['store_stats'],{'revisions':2,'receipts':19})
-        home=BeautifulSoup((self.root/'_site/index.html').read_text(),'html.parser')
+        home=BeautifulSoup((self.root/'_site/receipt/index.html').read_text(),'html.parser')
         self.assertEqual(home.select_one('[data-store-stat=revisions]').get_text(),'2 entries')
         self.assertEqual(home.select_one('[data-store-stat=receipts]').get_text(),'19 receipts')
+
+    def test_store_routes_module_boundaries_and_authored_labels(self):
+        build(self.root,base_path='/preview');check(self.root,base_path='/preview')
+        site=self.root/'_site'
+        page=BeautifulSoup((site/'index.html').read_text(),'html.parser')
+        self.assertEqual(sorted(a['href'] for a in page.select('a[href]')),['/preview/cctv/','/preview/receipt/','/preview/sys/'])
+        self.assertIsNotNone(page.select_one('svg.store-art'))
+        self.assertFalse(page.select('header,footer,.wp-site-blocks'))
+        self.assertTrue(page.select_one('script[src^="/preview/store/interactions.js"]'))
+        self.assertEqual(len(page.select('button.store-object')),6)
+        for button in page.select('button.store-object'):
+            dialog=page.find(id=button['aria-controls'])
+            self.assertIsNotNone(dialog)
+            self.assertFalse(dialog.has_attr('open'))
+            self.assertTrue(dialog.select('li'))
+        receipt=BeautifulSoup((site/'receipt/index.html').read_text(),'html.parser')
+        self.assertIn('TIME IS NON-REFUNDABLE',receipt.get_text())
+        self.assertEqual(receipt.select_one('.receipt-return a')['href'],'/preview/')
+        self.assertFalse((self.root/'templates/home.html').exists())
+        self.assertFalse((site/'store/page.html').exists())
+        self.assertFalse((site/'store/scene.py').exists())
+        self.assertFalse((site/'store/config.json').exists())
+        self.assertFalse((site/'receipt/page.html').exists())
+        for board in ('sys','cctv'):
+            terminal=BeautifulSoup((site/board/'index.html').read_text(),'html.parser')
+            self.assertFalse(terminal.select('.store-terminal-header a[href="/preview/receipt/"]'))
+            self.assertEqual(terminal.select_one('.store-session-exit a')['href'],'/preview/')
+        for directory in ('store','receipt'):
+            with self.assertRaisesRegex(ValueError,'source directory'):
+                build(self.root,output=self.root/directory)
 
     def test_store_statistics_reject_incomplete_git_history(self):
         clone=self.root/'shallow'

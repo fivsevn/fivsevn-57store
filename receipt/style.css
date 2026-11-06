@@ -80,3 +80,5 @@
 .wp-elements-57 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--contrast)}
 .wp-elements-58 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--contrast)}
 .wp-block-columns{box-sizing:border-box;display:flex;flex-wrap:wrap!important;align-items:normal!important}.wp-block-columns.is-not-stacked-on-mobile{flex-wrap:nowrap!important}.wp-block-columns.is-not-stacked-on-mobile>.wp-block-column{flex-basis:0;flex-grow:1}.wp-block-columns.is-not-stacked-on-mobile>.wp-block-column[style*=flex-basis]{flex-grow:0}.wp-block-column{flex-grow:1;min-width:0;overflow-wrap:break-word;word-break:normal}@media(min-width:782px){.wp-block-columns{flex-wrap:nowrap!important}.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column{flex-basis:0;flex-grow:1}.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column[style*=flex-basis]{flex-grow:0}}@media(max-width:781px){.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column{flex-basis:100%!important}}
+
+.receipt-return{font-family:"Courier Prime",monospace;font-size:10px;margin-bottom:20px}.receipt-return a{color:#50efc2}
