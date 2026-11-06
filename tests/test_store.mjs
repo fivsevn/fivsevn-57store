@@ -79,6 +79,22 @@ test('Store browser QA',{skip:!preview,timeout:120000},async t=>{
     });
   }
 
+  await t.test('Glass fronts and upper/lower shelves respond across the full fixture',async t=>{
+    const {context,page}=await open({viewport:{width:375,height:667},reducedMotion:'reduce'});
+    t.after(()=>context.close());
+    // Native artwork points on the visible hot-case glass and cold-case goods.
+    // These taps used to miss a target restricted to the fixture's middle.
+    for(const [x,y,title] of [[110,195,'热食柜'],[555,470,'乳品冷柜'],[575,685,'乳品冷柜'],[590,1280,'便当冷柜']]){
+      let box=await page.locator('.room').boundingBox();const scale=box.width/672;
+      await page.evaluate(y=>scrollTo(0,y-200),y*scale);
+      box=await page.locator('.room').boundingBox();
+      await page.mouse.click(box.x+x*scale,box.y+y*scale);
+      assert.equal(await page.locator('#room-note strong').innerText(),title);
+      assert.equal(await page.locator('#room-note').isVisible(),true);
+      await page.keyboard.press('Escape');
+    }
+  });
+
   await t.test('The three physical destinations navigate normally',async t=>{
     const {context,page,errors}=await open({viewport:{width:375,height:667}});
     t.after(()=>context.close());

@@ -17,8 +17,10 @@ def render():
         if item['target']:
             x,y,z,w,h=item['target'];cx,cy=project((x,y,z))
         else:
-            x1,y1,x2,y2=item['model'].bounds();cx=(x1+x2)/2;cy=y1+(y2-y1)*.60
-            w=max(76,min(156,(x2-x1)*.82));h=max(76,min(132,(y2-y1)*.54))
+            # Cover the whole visible fixture: the upper and lower shelves
+            # must respond to the same tap as its middle, without a hover cue.
+            x1,y1,x2,y2=item['model'].bounds();cx=(x1+x2)/2;cy=(y1+y2)/2
+            w=max(76,x2-x1);h=max(76,y2-y1)
         if item['href']:w=max(116,w);h=max(116,h)
         left=max(2,min(W-w-2,cx-w/2));top=max(2,min(H-h-2,cy-h/2))
         style=f'left:{left/W*100:.5f}%;top:{top/H*100:.5f}%;width:{w/W*100:.5f}%;height:{h/H*100:.5f}%'
