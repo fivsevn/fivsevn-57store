@@ -4,13 +4,24 @@
   if (!floor) return;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const choice = new URLSearchParams(location.search).get('motion');
-  let motionOverride = choice === 'on';
-  try {
-    if (choice === 'on') sessionStorage.setItem('57store-motion', 'on');
-    if (choice === 'off') sessionStorage.removeItem('57store-motion');
-    motionOverride = sessionStorage.getItem('57store-motion') === 'on';
-  } catch { /* The query still works if session storage is unavailable. */ }
-  document.documentElement.classList.toggle('motion-enabled', motionOverride);
+  // A deliberate choice follows the visitor across preview tabs and return
+  // links. System reduced motion remains the default until that choice exists.
+  const motionKey = '57store-motion';
+  let savedChoice = null;
+  try { savedChoice = localStorage.getItem(motionKey); } catch { /* Storage is optional. */ }
+  // Preserve an explicit choice made by the earlier per-tab preview.
+  if (!savedChoice) {
+    try { savedChoice = sessionStorage.getItem(motionKey); } catch { /* No storage access. */ }
+  }
+  let motionOverride = choice === 'on' || (choice !== 'off' && savedChoice === 'on');
+  for (const storageName of ['localStorage', 'sessionStorage']) {
+    try {
+      if (choice === 'off') window[storageName].removeItem(motionKey);
+      else if (motionOverride) window[storageName].setItem(motionKey, 'on');
+    } catch { /* The explicit query works even when storage is blocked. */ }
+  }
+  const syncMotion = () => document.documentElement.classList.toggle('motion-enabled', motionOverride);
+  syncMotion();
   const motionAllowed = () => motionOverride || !reducedMotion.matches;
   let openLabel = null;
   let openTrigger = null;
@@ -66,14 +77,45 @@
     if (event.key === 'Escape') close();
   });
   addEventListener('resize', position);
-  // Don't animate fixtures that are out of view, or an inactive browser tab.
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) entry.target.classList.toggle('is-away', !entry.isIntersecting);
-    }, {rootMargin:'80px'});
-    floor.querySelectorAll('svg > g[id^="fixture-"]').forEach(node => observer.observe(node));
+  // Observe stable HTML touch surfaces. SVG-group intersection reporting can
+  // vary in embedded webviews and animated geometry must not decide its own
+  // visibility. Decorative groups without a control remain inexpensive CSS.
+  const observed = new Map();
+  for (const trigger of floor.querySelectorAll('[data-store-object]')) {
+    const fixture = document.getElementById(`fixture-${trigger.dataset.storeObject}`);
+    if (fixture) observed.set(trigger, fixture);
   }
-  const pause = () => document.documentElement.classList.toggle('store-paused', document.hidden);
-  document.addEventListener('visibilitychange', pause);
-  pause();
+  const canObserve = 'IntersectionObserver' in window;
+  const syncVisibility = () => {
+    const height = window.innerHeight;
+    const width = window.innerWidth;
+    for (const [trigger, fixture] of observed) {
+      const box = trigger.getBoundingClientRect();
+      fixture.classList.toggle('is-away', canObserve && (box.bottom < -80 || box.top > height + 80 || box.right < 0 || box.left > width));
+    }
+    document.documentElement.classList.toggle('store-paused', document.hidden);
+  };
+  if (canObserve) {
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) observed.get(entry.target)?.classList.toggle('is-away', !entry.isIntersecting);
+    }, {rootMargin:'80px'});
+    for (const trigger of observed.keys()) observer.observe(trigger);
+  }
+  // Back/forward-cache restores and embedded-tab activation can preserve old
+  // pause classes; reconcile geometry and visibility when the surface returns.
+  const resume = () => { syncMotion(); syncVisibility(); };
+  document.addEventListener('visibilitychange', syncVisibility);
+  addEventListener('pageshow', resume);
+  addEventListener('focus', resume);
+  addEventListener('resize', syncVisibility);
+  addEventListener('storage', event => {
+    if (event.key !== motionKey) return;
+    motionOverride = event.newValue === 'on';
+    try {
+      if (motionOverride) sessionStorage.setItem(motionKey, 'on');
+      else sessionStorage.removeItem(motionKey);
+    } catch { /* Cross-tab preference still updates without session storage. */ }
+    resume();
+  });
+  resume();
 })();

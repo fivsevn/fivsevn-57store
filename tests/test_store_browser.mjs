@@ -36,12 +36,20 @@ try {
     assert.equal(await page.locator('header,footer,dialog,.store-masthead,.entry-number').count(),0);
     assert.deepEqual(await page.locator('a').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')).sort()),['/cctv/','/receipt/','/sys/']);
     assert.equal(await page.locator('main').count(),1);
+    assert.equal(await page.locator('svg.store-art image,svg.store-art foreignObject,svg.store-art script').count(),0,'Scene uses code-drawn SVG only');
+    assert.deepEqual(await page.locator('svg.store-art [href],svg.store-art [src],svg.store-art [xlink\\:href]').evaluateAll(nodes=>nodes.flatMap(node=>
+      ['href','src','xlink:href'].map(name=>node.getAttribute(name)).filter(value=>value && !value.startsWith('#')))),[],'SVG contains no external assets');
+    assert.equal(await page.locator('.object-toilet,.object-toiletdoor,.object-toiletbasin').count(),3,'Toilet is visible as room fixtures');
+    assert.equal(await page.locator('a[href*="toilet"],a[href*="cache"],a[href*="fragment"]').count(),0);
+    for (const route of ['sys','cctv']) {
+      assert.ok(config.entries.find(entry=>entry.id===route).bounds[1]>2000,`${route} must be in the rear staff area`);
+    }
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),true,`Horizontal overflow at ${width}`);
     const boxes = await page.locator('[data-store-object]').evaluateAll(nodes=>nodes.map(node=>{
       const r=node.getBoundingClientRect(); return {id:node.dataset.storeObject,small:node.dataset.small==='true',x:r.x,y:r.y,width:r.width,height:r.height};
     }));
     assert.ok(boxes.find(b=>b.id==='door').y<boxes.find(b=>b.id==='receipt').y,'Entrance appears before checkout');
-    assert.ok(boxes.find(b=>b.id==='cctv').y>boxes.find(b=>b.id==='drinks').y,'CCTV is in the rear office');
+    for (const route of ['sys','cctv']) assert.ok(boxes.find(b=>b.id===route).y>boxes.find(b=>b.id==='drinks').y,`${route} is in the rear office`);
     for (const box of boxes) {
       const min=box.small?24:44;
       assert.ok(box.width>=min-.01 && box.height>=min-.01,`Undersized target: ${JSON.stringify(box)}`);
@@ -58,8 +66,12 @@ try {
       assert.equal(await label.isVisible(),true,fixture.id);
       assert.equal(await page.locator('.shelf-label:visible').count(),1);
       assert.equal(await trigger.getAttribute('aria-expanded'),'true');
+      assert.equal(await label.locator('strong').innerText(),fixture.name);
+      assert.equal(await label.locator('span').innerText(),fixture.note);
+      assert.equal(await label.locator('button,a,img').count(),0,'Inspection label stays a small two-line note');
       const bounds=await label.boundingBox();
-      assert.ok(bounds.width<=160 && bounds.height<=110,`Label too large: ${fixture.id}`);
+      assert.ok(bounds.width<=112.1 && bounds.height<=60,`Label too large: ${fixture.id} at ${width}: ${JSON.stringify(bounds)}`);
+      assert.equal(await label.evaluate(el=>getComputedStyle(el).backgroundColor.match(/[\d.]+/g).slice(0,3).every(channel=>Number(channel)<80)),true,'Label uses the dark store palette');
       assert.ok(bounds.x>=0 && bounds.x+bounds.width<=width+1,`Label clipped: ${fixture.id}`);
       assert.ok(bounds.y>=0 && bounds.y+bounds.height<=844,`Label outside view: ${fixture.id}`);
       await trigger.click();
@@ -87,8 +99,24 @@ try {
         assert.equal(await exit.evaluate(el=>getComputedStyle(el).color),'rgb(107, 236, 174)');
         await terminal.getByRole('link',{name:'Exit terminal'}).click();
       } else {
-        const copy=await page.locator('body').innerText();
-        assert.ok(copy.indexOf('leave counter')>copy.indexOf('GOOD NIGHT.'));
+        const structure=await page.locator('.receipt-return').evaluate(el=>{
+          const comment=el.parentElement;
+          const lines=[...comment.children].filter(node=>node.tagName==='P');
+          const ticket=document.querySelector('.has-border-color.has-base-background-color');
+          return {
+            marker:comment.previousElementSibling?.textContent.trim(),
+            opening:lines[0].textContent.trim(),closing:lines.at(-1).textContent.trim(),
+            returnIndex:lines.indexOf(el),printerIndex:lines.findIndex(node=>node.textContent.startsWith('receipt printer:')),
+            ticketHasReturn:!!ticket?.querySelector('.receipt-return,a[href="/"]'),
+            ticketHasGoodNight:ticket?.textContent.includes('GOOD NIGHT.')
+          };
+        });
+        assert.equal(await page.locator('.receipt-return').count(),1);
+        assert.equal(structure.marker,'// store.rs');
+        assert.equal(structure.opening,'/*');assert.equal(structure.closing,'*/');
+        assert.ok(structure.returnIndex>0 && structure.returnIndex<structure.printerIndex,'Counter exit belongs to the opening store.rs comment before printer status');
+        assert.equal(structure.ticketHasReturn,false,'Receipt paper has no store navigation below GOOD NIGHT');
+        assert.equal(structure.ticketHasGoodNight,true);
         await page.locator('.receipt-return a').click();
       }
       await page.waitForURL(origin+'/');
@@ -108,16 +136,57 @@ try {
     if(width===390) await page.screenshot({path:path.join(output,'store-label-mobile.png'),fullPage:true});
     await page.keyboard.press('Escape');
     await page.mouse.click(2,2);
+    await page.screenshot({path:path.join(output,`store-${width}.png`),fullPage:true});
     if(width===390 || width===1440) await page.screenshot({path:path.join(output,width===390?'store-mobile.png':'store-desktop.png'),fullPage:true});
-    // A deliberate preview opt-in works even in an accessibility-reduced browser.
+    // The explicit choice reaches already-open tabs and subsequently opened
+    // root links, where the desktop preview can use a separate browsing tab.
+    const peer = await context.newPage();
+    await peer.emulateMedia({reducedMotion:'reduce'});
+    await peer.goto(origin);
+    assert.equal(await peer.locator('.steam').evaluate(el=>getComputedStyle(el).animationName),'none');
     await page.goto(origin+'/?motion=on');
+    await peer.waitForFunction(()=>document.documentElement.classList.contains('motion-enabled'));
     assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationName),'steam-rise');
+    const openingDoor = await page.locator('.door-left').evaluate(el=>getComputedStyle(el).transform);
+    const wakingSteam = await steam.evaluate(el=>getComputedStyle(el).transform);
+    await page.waitForTimeout(650);
+    assert.notEqual(await page.locator('.door-left').evaluate(el=>getComputedStyle(el).transform),openingDoor,'Door visibly moves during the first second');
+    assert.notEqual(await steam.evaluate(el=>getComputedStyle(el).transform),wakingSteam);
+    const freshTab = await context.newPage();
+    await freshTab.emulateMedia({reducedMotion:'reduce'});
+    await freshTab.goto(origin);
+    assert.equal(await freshTab.locator('.steam').evaluate(el=>getComputedStyle(el).animationName),'steam-rise');
+    await freshTab.close();
     await page.reload();
     assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationName),'steam-rise');
+    // A page restored with stale pause classes must reconcile visible fixtures.
+    await page.evaluate(()=>{
+      document.documentElement.classList.add('store-paused');
+      document.querySelector('#fixture-coffee').classList.add('is-away');
+      dispatchEvent(new Event('pageshow'));
+    });
+    assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationPlayState),'running');
     await page.goto(origin+'/?motion=off');
+    await peer.waitForFunction(()=>!document.documentElement.classList.contains('motion-enabled'));
     assert.equal(await steam.evaluate(el=>getComputedStyle(el).animationName),'none');
+    assert.equal(await peer.locator('.steam').evaluate(el=>getComputedStyle(el).animationName),'none');
+    await peer.close();
     await context.close();
   }
+  // Privacy settings can deny both storage APIs. Explicit motion still works.
+  const blockedStorage = await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  await blockedStorage.addInitScript(()=>{
+    for (const key of ['localStorage','sessionStorage']) Object.defineProperty(window,key,{
+      get(){ throw new DOMException('Storage blocked','SecurityError'); }
+    });
+  });
+  const blockedPage = await blockedStorage.newPage();
+  blockedPage.on('pageerror', error => errors.push(error.message));
+  await blockedPage.goto(origin+'/?motion=on');
+  assert.equal(await blockedPage.locator('.steam').evaluate(el=>getComputedStyle(el).animationName),'steam-rise');
+  await blockedPage.goto(origin+'/?motion=off');
+  assert.equal(await blockedPage.locator('.steam').evaluate(el=>getComputedStyle(el).animationName),'none');
+  await blockedStorage.close();
   const context = await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
   const page = await context.newPage();await page.goto(origin);
   assert.equal(await page.locator('svg.store-art').isVisible(),true);
@@ -125,5 +194,5 @@ try {
   await page.locator('.entry-receipt').click();await page.waitForURL(`${origin}/receipt/`);
   await context.close();
   assert.deepEqual(errors,[]);
-  console.log(`Passed: 4 viewport sizes, ${config.fixtures.length} tap labels, routes, focus, motion over time, reduced motion, explicit opt-in, no-JS.`);
+  console.log(`Passed: 4 viewport sizes, ${config.fixtures.length} tap labels, routes, focus, motion over time, reduced motion, cross-tab explicit opt-in, restored pages, blocked storage, no-JS.`);
 } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}

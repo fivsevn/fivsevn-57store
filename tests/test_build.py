@@ -215,11 +215,25 @@ class BuildTests(unittest.TestCase):
         build(self.root,base_path='/preview');check(self.root,base_path='/preview')
         site=self.root/'_site'
         page=BeautifulSoup((site/'index.html').read_text(),'html.parser')
+        config=json.loads((self.root/'store/config.json').read_text())
         self.assertEqual(sorted(a['href'] for a in page.select('a[href]')),['/preview/cctv/','/preview/receipt/','/preview/sys/'])
-        self.assertIsNotNone(page.select_one('svg.store-art'))
+        art=page.select_one('svg.store-art')
+        self.assertIsNotNone(art)
+        self.assertFalse(art.select('image,foreignObject,foreignobject,script,iframe'))
+        for element in art.find_all(True):
+            for attribute in ('href','xlink:href','src'):
+                if element.has_attr(attribute):
+                    self.assertTrue(element[attribute].startswith('#'),'Scene must be drawn in code without external assets')
         self.assertFalse(page.select('header,footer,.wp-site-blocks'))
         self.assertTrue(page.select_one('script[src^="/preview/store/interactions.js"]'))
-        self.assertGreaterEqual(len(page.select('button.store-object')),30)
+        self.assertEqual(len(page.select('button.store-object')),len(config['fixtures']))
+        for entry in config['entries']:
+            if entry['id'] in ('sys','cctv'):
+                self.assertGreater(entry['bounds'][1],2000,'Both terminals belong in the rear staff area')
+        for fixture in ('toiletdoor','toilet','toiletbasin','wash','handsink','foodprep','stock','receiving','breaktable','lockers','bench'):
+            self.assertIsNotNone(page.select_one(f'#fixture-{fixture}'))
+            self.assertIsNotNone(page.select_one(f'button[data-store-object="{fixture}"]'))
+        self.assertFalse(page.select('a[href*="toilet"],a[href*="cache"],a[href*="fragment"]'))
         for button in page.select('button.store-object'):
             label=page.find(id=button['aria-controls'])
             self.assertIsNotNone(label)
@@ -231,11 +245,22 @@ class BuildTests(unittest.TestCase):
         self.assertIn('每日生活、本地缓存。',page.get_text())
         receipt=BeautifulSoup((site/'receipt/index.html').read_text(),'html.parser')
         self.assertIn('TIME IS NON-REFUNDABLE',receipt.get_text())
-        self.assertEqual(receipt.select_one('.receipt-return a')['href'],'/preview/')
+        returns=receipt.select('.receipt-return')
+        self.assertEqual(len(returns),1)
+        self.assertEqual(returns[0].a['href'],'/preview/')
+        comment=returns[0].parent
+        self.assertEqual(comment.find_previous_sibling('p').get_text(strip=True),'// store.rs')
+        lines=comment.find_all('p',recursive=False)
+        self.assertEqual(lines[0].get_text(strip=True),'/*')
+        self.assertEqual(lines[-1].get_text(strip=True),'*/')
+        printer=next(p for p in lines if p.get_text().startswith('receipt printer:'))
+        self.assertLess(lines.index(returns[0]),lines.index(printer))
+        ticket=receipt.select_one('.has-border-color.has-base-background-color')
+        self.assertIn('GOOD NIGHT.',ticket.get_text())
+        self.assertFalse(ticket.select('.receipt-return,a[href="/preview/"]'))
         self.assertFalse((self.root/'templates/home.html').exists())
-        self.assertFalse((site/'store/page.html').exists())
-        self.assertFalse((site/'store/scene.py').exists())
-        self.assertFalse((site/'store/config.json').exists())
+        for source in ('page.html','scene.py','equipment.py','furnishings.py','config.json'):
+            self.assertFalse((site/'store'/source).exists())
         self.assertFalse((site/'receipt/page.html').exists())
         for board in ('sys','cctv'):
             terminal=BeautifulSoup((site/board/'index.html').read_text(),'html.parser')

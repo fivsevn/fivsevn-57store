@@ -4,9 +4,9 @@
 
 ## Sources and layout
 
-The entrance is at the **top**, so a phone enters from the front and scrolls deeper into the shop. The counter is beside the entrance, with a short bounded cashier workspace. Magazines face the front window; umbrellas and baskets stay to its side. Four central gondolas have front, middle and rear cross-aisles. Both side aisles are public. Coffee and waste sorting are separate from chilled dairy and the sliding-lid ice-cream freezer. Rice balls, sandwiches and bentos sit in open chilled cases along the opposite perimeter.
+The entrance is at the **top**, so a phone enters from the front and scrolls deeper into the shop. The counter is beside the entrance, with a short bounded cashier workspace. Magazines face the front window; umbrellas and baskets stay to its side. Larger central snack, noodle and bread gondolas have cross-aisles between them; daily goods sit on the perimeter. Both side aisles are public. Coffee and waste sorting are separate from chilled dairy and the sliding-lid ice-cream freezer. Rice balls, sandwiches and bentos sit in open chilled cases along the opposite perimeter.
 
-The drink display at the rear is a **walk-in cooler**, not a shallow cabinet pushed against an arbitrary wall. Behind its glass doors there are rear-access stock racks, an open replenishment aisle, boxed pre-chilled drinks and a circulating-air unit. A thick insulated swing door connects this room to the back stock room. The staff entrance opens from the public rear cross-aisle. The office desk is separated by a short wall with a doorway; its computer is the CCTV entry. The small camera above the front window is only a camera.
+The drink display at the rear is a **walk-in cooler**, not a shallow cabinet pushed against an arbitrary wall. Behind its glass doors there are rear-access stock racks, an open replenishment aisle, boxed pre-chilled drinks and a circulating-air unit. A thick insulated swing door connects this room to the back stock room. The staff entrance opens from the public rear cross-aisle. A separate public toilet has its own door from the rear customer aisle, toilet bowl, paper holder, support rail and basin. The employee entrance is a different door. Beyond it, the rear workplace continues through receiving/dry stock, a dedicated cleaning recess, utensil wash-up, a separate employee handwash basin and food preparation, then an office containing both the internal SYS computer and CCTV computer, and finally a tea/break area with personal fridge, table, chairs, changing bench and lockers. Physical partitions have real openings and the service spine stays clear. Neither internal terminal is a public self-service kiosk. The small camera above the front window is only a camera.
 
 This is a compact fictional store, not a construction drawing or a traced floor plan. Equipment types and circulation were checked against:
 
@@ -16,21 +16,32 @@ This is a compact fictional store, not a construction drawing or a traced floor 
 - [Panasonic showcase product types](https://panasonic.co.jp/hvac-cc/biz/products/cold-chain/showcase/) — distinguish open chilled cases, reach-in cases and chest freezers.
 - [Saint11: pixel clusters](https://saint11.art/pixel_art_articles/article2/), [shading](https://saint11.art/pixel_art_articles/article4/) and [animation timing](https://saint11.art/pixel_art_articles/article3/) — coherent silhouettes, limited colour clusters, consistent hard-edged light and stepped motion with pauses.
 
-References inform the design; no reference photos, floor plans, tutorials or third-party sprites are shipped. The original drawing, palette adaptations, goods and motion are authored here. All three brand slogans are printed on the physical glazing transom. The floor and entrance mat carry no explanatory text.
+Additional real-equipment / backroom references (reviewed for construction, not copied into the site):
+
+- [Fuji Electric coffee equipment](https://www.fujielectric.co.jp/products/food/c03_1/product_detail/coffee_machine.html): bean hoppers, control face, recessed cup bay and drip tray.
+- [Nichiwa hot-food showcase](https://www.nichiwadenki.co.jp/product/electric-hot-showcase/): vented canopy, open glass volume, wire shelves and shallow food trays.
+- [Toshiba TEC checkout hardware](https://www.toshibatec.co.jp/news/release/20230214-01.html), [Epson thermal printer](https://www.epson.jp/products/receiptprinter/tmm302/): tilted POS on a support, separate small printer and paper slot.
+- [RF Yamakawa magazine display](https://www.rf-yamakawa.co.jp/products/shwa-001nj/): inclined covers and staggered retaining ledges; used as furniture-structure reference, not a claim this exact model is in a konbini.
+- [Panasonic open-front case](https://panasonic.co.jp/hvac-cc/biz/products/cold-chain/item/details.php?no=SAR-V660K), [sliding-glass freezer](https://news.panasonic.com/jp/press/jn250708-2): distinct open shelves versus a low insulated chest, lid overlap and basket divisions.
+- [Lawson customer facilities](https://www.lawson.jp/en/csr/consumer/support/), [SFA convenience-store installations](https://sfa-japan.jp/showcase/convenient-store/): toilet access and handwashing are distinct from employee food/utensil preparation.
+
+References inform the design; no reference photos, floor plans, tutorials or third-party sprites are shipped. The original drawing, palette adaptations, goods and motion are authored here. All artwork is drawn from native SVG geometry generated by the Python source files. No bitmap, sprite atlas, texture, SVG image element, foreignObject or remote artwork is embedded. All three brand slogans are printed on the physical glazing transom. The floor and entrance mat carry no explanatory text.
 
 ## Module files
 
 - `page.html`: semantic main, figure, three destinations, invisible descriptive alternative.
-- `scene.py`: deterministic, layered, integer-coordinate SVG. Coordinate space is **640 × 1500**; no runtime renderer, external art service, framework or fetch.
-- `config.json`: 3 route anchors and 32 compact inspection notes with authored hit areas. Descriptions represent fictional stock, not live inventory.
+- `scene.py`: deterministic, layered, integer-coordinate SVG. Coordinate space is **640 × 2660**; no runtime renderer, external art service, framework or fetch.
+- `equipment.py`: independently drawn coffee, hot-food, POS/printer, microwave, magazine, fresh-food, bento, dairy, freezer and drink equipment with real construction details.
+- `furnishings.py`: separately drawn stock shapes, office computers, toilet, storage, cleaning, sink, break table and lockers.
+- `config.json`: 3 route anchors and 46 compact inspection notes with authored hit areas. Descriptions represent fictional stock, not live inventory.
 - `style.css`: room scaling, in-world feedback, compact notes and motion.
 - `interactions.js`: tap/click/keyboard, note positioning and visibility-aware animation pausing.
 
-The desktop width is capped at 800 CSS pixels. Mobile scales proportionally and scrolls vertically. Primary equipment/routes use at least 44 × 44 CSS pixel targets at 320px; five small props/people have at least 24px targets and do not overlap neighbouring controls. Keep bounds consistent with artwork. Related small items such as the sink/stock rack, lockers/clock and cooler fan/reserve crates share an inspection area.
+The desktop width is capped at 800 CSS pixels. Mobile scales proportionally and scrolls vertically. Primary equipment/routes use at least 44 × 44 CSS pixel targets at 320px; small props/people have at least 24px targets and do not overlap neighbouring controls. Keep bounds consistent with artwork. Most equipment has an individual inspection area; the grouped receiving/stock area includes the delivery door. Toilet access remains an inspection, not a new route to `/toilet/`.
 
 ## Interaction and animation
 
-Inspection shows a **154px-wide non-modal note** beside the object, with one title and one short sentence. No overlay, inventory sheet, close button, focus trap or hover state. Tap again, tap elsewhere or press Escape to close. All 32 notes can be reached by keyboard. The receipt printer, SYS terminal and office CCTV computer remain ordinary links. Unmodified clicks briefly move paper or screen content before navigation; modified/new-tab clicks retain browser behavior. Keyboard focus illuminates the actual object rather than drawing a hit-box outline.
+Inspection shows a **compact dark game tooltip**, at most 112px wide and 60px high, with a 10px object name and a few 9px words describing its purpose or contents. No overlay, inventory sheet, close button, focus trap or hover state. Tap again, tap elsewhere or press Escape to close. All 46 notes can be reached by keyboard. The receipt printer, SYS terminal and office CCTV computer remain ordinary links. Unmodified clicks briefly move paper or screen content before navigation; modified/new-tab clicks retain browser behavior. Keyboard focus illuminates the actual object rather than drawing a hit-box outline.
 
 The motion designs are independent and deliberately unsynchronised:
 
@@ -55,9 +66,9 @@ The motion designs are independent and deliberately unsynchronised:
 19. Office monitor scan line moves across its own screen.
 20. Staff clock hand ticks.
 
-A tapped shelf nudges its goods; a tapped screen advances its contents. CSS animates only small transforms/opacity regions. Off-screen fixtures and hidden tabs pause. No audio, network animation loop, GPU blur, video background or analytics.
+A tapped shelf nudges its goods; a tapped screen advances its contents. CSS animates only small transforms/opacity regions. Off-screen fixtures and hidden tabs pause. Stable HTML hit areas drive visibility, and page restore/focus reconciles stale pause classes. The automatic door moves within the first second, and steam, cash handling and paper movement are visibly stepped. Additional staff-room kettle steam, preparation steam and a hanging apron move independently. No audio, network animation loop, GPU blur, video background or analytics.
 
-`prefers-reduced-motion: reduce` disables all movement and link delays by default. For a **deliberately requested animated preview**, `?motion=on` enables motion in this tab and remembers it for that tab session; `?motion=off` clears the override. This exists because the desktop preview browser can inherit reduced motion. No global browser or OS setting is changed. Without JavaScript the complete illustration and all three destination links still work.
+`prefers-reduced-motion: reduce` disables all movement and link delays by default. For a **deliberately requested animated preview**, `?motion=on` records that explicit preference for this origin, including other open tabs and newly opened return links; `?motion=off` clears it. The choice still works when storage is blocked. No preference is stored before an explicit opt-in. This exists because the desktop preview browser can inherit reduced motion. No global browser or OS setting is changed. Without JavaScript the complete illustration and all three destination links still work.
 
 ## Verification and review
 
