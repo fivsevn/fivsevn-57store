@@ -1,4 +1,7 @@
-"""Original, layered pixel cutaway; 640 × 2660 integer authoring grid.
+"""Original high-angle overhead pixel interior; 640 × 2660 authoring grid.
+
+One parallel camera: ground axes remain X/Y; height projects toward north.
+All objects are drawn from above, with top planes dominating short south lips.
 
 Customer circulation is open. Insulated rear room supplies the drink display;
 only the enclosed rear rooms and the inside of the counter are staff space.
@@ -64,43 +67,39 @@ def render_scene():
         r(x,y,w,4,STEEL);r(x,y,w,1,PALE)
         for xx in range(x+5,x+w-5,20):r(xx,y+1,8,2,WHITE)
     def bottle(x,y,c=MINT,scale=1):
+        # Above the bottle: shoulder rim and cap, never a full upright label.
         p.append(f'<g transform="translate({x} {y}) scale({scale})">')
-        r(3,0,6,3,WHITE);r(2,3,8,4,c);r(1,7,10,17,c);r(2,11,8,7,WHITE)
-        r(4,12,5,4,DEEP);r(2,7,2,4,WHITE);r(2,22,8,2,STEEL);end()
+        path('M2 2h8l2 2v9l-2 2H2l-2-2V4z',INK)
+        path('M3 3h6l2 2v6l-2 2H3l-2-2V5z',c)
+        r(3,3,5,2,PALE);r(4,5,4,4,WHITE);r(5,6,2,2,STEEL);end()
     def pack(x,y,c=SAGE,kind='bag'):
-        if kind=='bag':
-            path(f'M{x+2} {y}h14v3h2v22h-18v-22h2z',INK)
-            r(x+2,y+3,14,19,c);r(x+3,y+5,12,2,WHITE);r(x+5,y+10,9,8,WHITE);r(x+7,y+12,5,4,DEEP);r(x+3,y+21,12,2,STEEL)
-            if (x+y)%3==0:
-                r(x+3,y+9,12,2,DEEP);r(x+3,y+17,12,2,DEEP)
-            elif (x+y)%3==1:
-                path(f'M{x+5} {y+18}l4-9 5 9z',SAGE)
-        elif kind=='box':
-            r(x,y,18,24,INK);r(x+2,y+2,14,20,c);r(x+3,y+3,12,3,WHITE);r(x+4,y+9,9,8,DEEP);r(x+6,y+11,5,4,PALE)
-            if x%3==0:
-                r(x+4,y+8,4,10,WHITE);r(x+10,y+8,4,10,WHITE);r(x+5,y+7,2,2,INK);r(x+11,y+7,2,2,INK)
-            elif x%3==1:
-                r(x+3,y+8,12,11,PALE);r(x+6,y+10,6,2,WHITE)
-        elif kind=='cup':
-            path(f'M{x} {y+3}h19l-3 20h-13z',c);r(x,y,19,4,WHITE);r(x+4,y+8,11,7,DEEP);r(x+6,y+10,7,3,PALE);r(x+4,y+19,11,2,STEEL)
-        elif kind=='bread':
-            r(x,y+2,20,21,PALE);r(x+3,y+5,14,14,SAGE);r(x+5,y+4,10,3,WHITE);r(x+4,y+18,12,4,DEEP);r(x+3,y+1,14,2,STEEL)
-            path(f'M{x+5} {y+14}v-5h3v-2h5v2h3v5z',WHITE);r(x+7,y+16,7,2,PALE)
+        # Flat wrapping / a lid viewed from the same high camera as furniture.
+        r(x,y+2,20,23,INK);r(x+2,y+2,16,19,c);r(x+3,y+3,14,2,WHITE)
+        r(x+2,y+21,16,3,STEEL);r(x+6,y+8,9,7,PALE);r(x+8,y+10,5,3,DEEP)
+        if kind=='bread':
+            path(f'M{x+5} {y+7}h10v2h3v9h-3v2h-10v-2h-2v-9h2z',PALE)
+            r(x+7,y+8,2,10,WHITE);r(x+12,y+8,2,10,WHITE)
     def carton(x,y,w=34,h=25):
         box(x,y,w,h,SAGE,DEEP,8);r(x+w//2-2,y+3,4,h-3,PALE);r(x+5,y+9,10,8,WHITE);r(x+7,y+11,6,2,STEEL)
     def person(x,y,kind,coat=PALE):
+        # Crown, shoulders and hands. No frontal face / standing elevation.
         p.append(f'<g transform="translate({x} {y})">');motion(kind)
-        r(-6,32,37,8,INK,'opacity=".45"')
-        g(cls='feet');r(2,28,8,12,INK);r(17,28,8,12,INK);end()
-        r(0,12,27,20,coat);r(3,13,20,20,coat);r(8,12,7,17,DEEP)
-        g(cls='hand');r(-5,15,6,15,coat);r(-5,27,6,5,PALE);end()
-        r(27,17,6,12,coat);r(27,27,6,5,PALE)
-        r(4,-1,19,17,PALE);r(1,-2,25,9,INK);r(4,-5,19,6,INK);r(2,5,5,9,INK)
-        r(10,8,2,2,INK);r(19,8,2,2,INK)
-        if kind in ('clerk','restocker'):r(17,17,6,3,WHITE)
+        path('M-4 14h34v20H-4z',INK,'opacity=".4"')
+        g(cls='feet');r(4,28,7,7,INK);r(18,28,7,7,INK);end()
+        path('M0 12h5V9h18v3h5v17H0z',coat)
+        r(3,13,4,13,SAGE);r(21,13,4,13,STEEL)
+        g(cls='hand');r(-5,17,8,6,coat);r(-8,17,5,6,PALE);end()
+        r(26,17,8,6,coat);r(32,17,5,6,PALE)
+        # The hair crown masks the torso, with one consistent north highlight.
+        path('M8 1h12v3h5v15h-4v4H7v-4H3V5h5z',INK)
+        r(8,3,12,3,DARK);r(7,6,5,3,STEEL);r(20,9,3,6,DARK)
+        if kind in ('clerk','restocker'):r(19,25,6,3,WHITE)
+        elif kind=='reader':
+            g(cls='hand');r(25,21,24,20,INK);r(27,22,10,17,WHITE);r(38,22,10,17,PALE)
+            r(37,23,1,16,STEEL);r(29,25,6,4,DEEP);r(40,26,6,2,SAGE);r(40,31,6,1,STEEL);end()
         else:
-            r(28,31,18,13,DEEP);r(28,31,18,3,MINT);r(31,27,12,2,PALE)
-            for xx in (31,36,41):r(xx,36,2,5,SAGE)
+            r(31,27,18,12,DEEP);r(31,27,18,2,MINT);r(34,24,12,2,PALE)
+            for xx in (34,39,44):r(xx,31,2,5,SAGE)
         end();end()
     def wall(x,y,w,h=10):
         r(x+4,y+8,w,h+7,INK,'opacity=".5"');r(x,y,w,h,STEEL);r(x,y,w,4,PALE)
@@ -121,13 +120,11 @@ def render_scene():
     r(20,30,8,H-50,PALE);r(28,30,4,H-50,STEEL)
     r(610,30,10,H-50,PALE);r(606,30,4,H-50,STEEL)
     path('M190 310h265v1020H190z',WHITE,'opacity=".035"')
-    # Physical transom, resting on the window mullions, with readable branding.
-    g('sign');box(25,20,590,77,DARK,STEEL,11)
-    motion('sign-light');text(43,56,'57STORE',MINT,31);text(45,80,'ゴナナストア',PALE,14);end()
-    r(253,33,2,49,STEEL)
-    text(275,44,'每日生活、本地缓存。',WHITE,14)
-    text(275,63,'Daily Life, Local Cache.',PALE,14)
-    text(275,82,'暮らし、ローカルキャッシュ。',PALE,14);end()
+    # The storefront is a cut wall viewed from above, not a front-facing banner.
+    g('sign');r(30,24,580,15,INK);r(34,27,572,8,STEEL)
+    motion('sign-light');r(37,28,566,3,PALE);r(40,35,560,3,MINT);end();end()
+    r(34,42,572,63,'#284037')
+    for xx in range(40,603,44):r(xx,45,2,55,'#3b5549')
     for xx,ww in ((32,211),(443,163)):
         r(xx,109,ww,29,INK);r(xx+4,112,ww-8,22,'#45695b');r(xx+5,114,ww-10,2,PALE)
         for k in range(xx+25,xx+ww-5,43):r(k,112,3,22,STEEL)
@@ -135,9 +132,15 @@ def render_scene():
     for name,xx in [('door-left',250),('door-right',344)]:
         motion(name);r(xx,111,92,34,STEEL);r(xx+3,114,86,26,'#47675c');r(xx+3,115,85,2,PALE);r(xx+4,128,84,3,MINT);end()
     r(248,148,191,4,PALE);r(251,153,186,4,INK);r(334,108,14,4,MINT);end()
-    g('mat');r(263,169,161,86,INK);r(268,174,151,76,'#234c3c')
-    for yy in range(178,245,5):r(272,yy,143,1,'#35624d')
-    r(276,181,135,3,SAGE);r(276,239,135,3,SAGE);end()
+    # Brand and slogans are woven into a floor mat, aligned with the floor.
+    g('mat');r(245,166,234,119,INK);r(249,170,226,111,'#234c3c')
+    for yy in range(174,278,4):r(253,yy,218,1,'#2b5543')
+    r(257,176,210,2,SAGE);r(257,273,210,2,SAGE)
+    text(362,201,'57STORE',MINT,23,'middle')
+    text(362,216,'ゴナナストア',PALE,12,'middle')
+    text(362,234,'每日生活、本地缓存。',WHITE,13,'middle')
+    text(362,250,'Daily Life, Local Cache.',PALE,12,'middle')
+    text(362,266,'暮らし、ローカルキャッシュ。',PALE,12,'middle');end()
     # Checkout work aisle is enclosed on three sides, accessed on its right.
     r(34,148,194,173,'#28382e');r(35,152,6,170,STEEL)
     device('warmers','warmer',41,151,91,85)
@@ -149,19 +152,25 @@ def render_scene():
     g('camera');r(565,111,4,24,STEEL);r(555,124,19,6,STEEL)
     motion('camera-swivel');path('M550 125h22v15h-22l-7-4v-7z',PALE);r(543,129,6,8,INK);r(552,127,6,2,WHITE);end();end()
     g('baskets')
-    for yy in (318,325,332):
-        path(f'M435 {yy}h39l-4 24h-31z',STEEL);r(439,yy+3,31,3,PALE)
-        for xx in (443,451,459):r(xx,yy+10,3,8,INK)
-    end()
-    g('umbrella');box(529,344,50,25,DEEP,STEEL,13)
-    for xx,yy in ((536,324),(547,319),(562,328)):
-        r(xx,yy,3,37,PALE);path(f'M{xx} {yy}v-8h9v7h-3v-4h-3v5z',MINT)
+    for yy in (320,324,328):
+        r(431,yy,49,40,INK);r(434,yy+2,43,33,STEEL)
+        r(439,yy+6,33,23,DEEP)
+        for xx in range(442,469,6):r(xx,yy+8,2,19,SAGE)
+        for row in (yy+12,yy+21):r(440,row,31,2,SAGE)
+    r(435,326,40,2,PALE);end()
+    g('umbrella');box(529,338,50,46,STEEL,DARK,7)
+    r(535,345,38,31,DEEP)
+    for xx,yy in ((539,350),(552,345),(562,358)):
+        path(f'M{xx} {yy}h7l3 3v12l-3 3h-7l-3-3v-12z',PALE)
+        r(xx+2,yy+2,2,9,WHITE);r(xx+3,yy+3,4,3,MINT)
     end()
     device('coffee','coffee',39,424,118,159)
     g('bins')
-    for xx in (43,95):
-        box(xx,613,45,74,STEEL,DARK,13);r(xx+4,617,37,14,PALE);r(xx+11,622,23,5,INK)
-        r(xx+8,651,29,20,SAGE);path(f'M{xx+14} 656h15v3h-15z',DARK)
+    for xx in (43,101):
+        box(xx,613,48,70,STEEL,DARK,9)
+        r(xx+4,617,40,61,PALE);r(xx+10,628,28,28,INK)
+        path(f'M{xx+15} 631h18l4 4v13l-4 4h-18l-4-4v-13z',DEEP)
+        r(xx+9,668,30,3,SAGE)
     end()
     # Larger single central gondolas retain two real circulation aisles.
     furnishing('snacks','snacks',224,431,186,229)
@@ -183,11 +192,11 @@ def render_scene():
     wall(30,1352,34);wall(151,1352,44);vwall(194,1352,314)
     door('toiletdoor',65,1352,85)
     # A human pictogram is fixed to the door, not written on the floor.
-    r(69,1380,7,7,DEEP);r(68,1389,9,13,DEEP);r(68,1402,3,10,DEEP);r(74,1402,3,10,DEEP)
+    r(68,1384,5,13,DEEP);r(68,1384,5,3,WHITE)
     furnishing('toilet','toilet',40,1432,108,144)
     g('toiletbasin');box(127,1584,54,37,PALE,STEEL,10);r(134,1591,37,22,STEEL);r(140,1596,26,12,INK)
     path('M149 1593v-16h13v9h-3v-6h-7v13z',WHITE);r(172,1577,9,13,MINT)
-    r(141,1544,37,26,STEEL);r(144,1547,31,20,'#aac1b5');path('M145 1548h6l22 18h-6z',WHITE,'opacity=".4"');end()
+    r(132,1580,45,5,STEEL);r(136,1581,36,2,'#aac1b5');end()
     wall(30,1665,173)
     # A separate employee door leads to the service spine, never through WC.
     door('staffdoor',204,1352,74,'right')
@@ -222,9 +231,9 @@ def render_scene():
     r(383,2000,72,27,SAGE);r(387,2003,63,21,PALE);r(390,2007,28,5,WHITE)
     r(465,1996,37,30,STEEL);r(469,2000,29,22,DARK)
     for xx in (472,479,486,493):r(xx,2002,2,18,PALE)
-    r(521,1997,27,25,PALE);r(528,1992,13,4,STEEL)
+    path('M524 1997h21l4 4v17l-4 4h-21l-4-4v-17z',PALE);r(526,2002,17,14,DEEP);r(517,2007,4,8,STEEL);r(549,2007,4,8,STEEL)
     motion('prep-steam');path('M531 1993v-8h3v-5h-3v-7h3v-6h3v9h-3v5h3v12z',WHITE,'opacity=".6"');end()
-    r(382,2045,7,21,INK);r(579,2045,7,21,INK);end()
+    r(382,2045,7,7,INK);r(579,2045,7,7,INK);end()
     # A dedicated handwash basin (not the food wash-up sink).
     g('handsink');box(365,1848,72,41,STEEL,DARK,10);r(372,1856,56,25,PALE);r(380,1861,39,15,DEEP)
     path('M394 1861v-19h15v10h-4v-7h-7v16z',WHITE);r(424,1841,10,15,MINT);end()
@@ -234,23 +243,31 @@ def render_scene():
     for xx in range(37,601,24):r(xx,2104,1,222,'#34483a')
     furnishing('sys','sysdesk',42,2131,218,174)
     furnishing('cctv','cctvdesk',367,2131,218,174)
-    g('office');r(278,2138,65,72,PALE);r(281,2141,59,66,STEEL)
-    for xx,yy in ((286,2148),(313,2148),(292,2180)):
-        r(xx,yy,22,24,WHITE);r(xx+3,yy+5,15,2,DEEP);r(xx+3,yy+10,13,2,DEEP)
-    end()
+    # The handover board is on a short wall spur, shown by its top/page edges.
+    # It must not become furniture blocking the central office passage.
+    g('office');vwall(264,2100,102);r(275,2123,5,68,PALE)
+    for yy in (2128,2146,2165):r(280,yy,3,15,WHITE)
+    r(275,2191,7,3,STEEL);end()
     # Locker / rest room is behind another partition; the centre stays walkable.
     wall(32,2338,232);wall(354,2338,252)
     r(32,2350,573,282,'#334438')
     for xx in range(35,601,24):r(xx,2352,1,276,'#40503f')
     furnishing('breaktable','breaktable',45,2480,216,142)
-    furnishing('lockers','lockers',451,2374,145,192)
-    g('stafffridge');box(45,2371,69,50,PALE,STEEL,12);r(50,2381,58,30,SAGE);r(96,2388,4,13,INK);r(52,2417,51,3,STEEL);end()
-    g('kettle');box(145,2380,102,30,STEEL,DARK,10);r(161,2358,27,33,PALE);r(165,2354,20,5,STEEL);r(189,2368,9,18,STEEL)
-    r(207,2373,19,21,WHITE);r(226,2378,6,11,STEEL)
-    motion('break-steam');path('M214 2371v-7h3v-7h-3v-7h3v-5h3v8h-3v7h3v11z',WHITE,'opacity=".6"');end();end()
-    g('bench');box(375,2522,57,77,SAGE,DEEP,11);r(381,2607,6,15,INK);r(419,2607,6,15,INK);end()
-    g('clock');r(297,2379,38,39,INK);r(301,2383,30,31,PALE);r(313,2387,3,15,DEEP)
-    p.append('<g transform="translate(316 2400)">');motion('clock-hand');r(0,-11,1,13,INK);end();end();end()
+    furnishing('lockers','lockers',451,2374,145,96)
+    g('stafffridge');box(45,2371,69,50,PALE,STEEL,8)
+    r(50,2375,59,39,WHITE);r(96,2421,9,3,INK)
+    for xx in range(55,99,5):r(xx,2377,2,8,STEEL)
+    end()
+    g('kettle');box(145,2372,102,42,STEEL,DARK,8)
+    path('M163 2377h22l5 5v16l-5 4h-22l-5-4v-16z',PALE)
+    path('M166 2380h16l3 3v10l-3 3h-16l-3-3v-10z',STEEL)
+    r(170,2383,8,6,WHITE);r(187,2384,7,12,INK);r(189,2387,3,6,PALE)
+    path('M207 2382h14l3 3v13l-3 3h-14l-3-3v-13z',WHITE)
+    r(208,2386,12,10,DEEP);r(224,2387,5,10,PALE)
+    motion('break-steam');path('M214 2381v-7h3v-7h-3v-7h3v-5h3v8h-3v7h3v11z',WHITE,'opacity=".6"');end();end()
+    g('bench');box(375,2522,57,77,SAGE,DEEP,11);r(381,2607,6,6,INK);r(419,2607,6,6,INK);end()
+    g('clock');r(297,2379,38,24,INK);r(301,2382,30,16,PALE);r(313,2384,3,9,DEEP)
+    p.append('<g transform="translate(316 2391)">');motion('clock-hand');r(0,-6,1,7,INK);end();end();end()
     wall(20,2637,600,15)
     p.append('</svg>')
     return ''.join(p)
