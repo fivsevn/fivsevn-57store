@@ -114,12 +114,26 @@ class FullStoreSceneTests(unittest.TestCase):
         self.assertLessEqual(colors,COLORS)
         self.assertFalse(self.controls.select('img, image, iframe, script'))
 
-    def test_full_scene_has_exactly_the_three_requested_destinations(self):
+    def test_full_scene_links_directly_to_receipt_and_sys(self):
         anchors=self.controls.select('a[href]')
-        self.assertEqual(len(anchors),3)
-        self.assertEqual({anchor['href'] for anchor in anchors},{'/receipt/','/sys/','/cctv/'})
+        self.assertEqual(len(anchors),2)
+        self.assertEqual({anchor['href'] for anchor in anchors},{'/receipt/','/sys/'})
         self.assertTrue(all(anchor.get('aria-label','').strip() for anchor in anchors))
+        self.assertFalse(self.controls.select('.room-console'))
         self.assertTrue(self.output['description'].strip())
+
+    def test_back_office_has_one_left_computer_and_three_locker_banks(self):
+        owners={element.get('data-owner') for element in self.svg.iter() if element.get('data-owner')}
+        computers={element.get('data-owner') for element in self.svg.iter() if element.get('data-piece')=='crt-housing'}
+        locker_doors={(element.get('data-owner'),element.get('data-piece')) for element in self.svg.iter() if element.get('data-piece','').startswith('locker-door-')}
+        lockers={owner for owner,_ in locker_doors}
+        self.assertEqual(computers,{'sys'})
+        self.assertIn('sys',owners)
+        self.assertNotIn('cctv',owners)
+        self.assertFalse(self.controls.select('[data-object="cctv"]'))
+        self.assertEqual(lockers,{'lockers-1','lockers-2','lockers-3'})
+        for owner in lockers:
+            self.assertEqual(sum(bank==owner for bank,_ in locker_doors),6,'Each bank retains six visible compartments')
 
 
 if __name__=='__main__':unittest.main()

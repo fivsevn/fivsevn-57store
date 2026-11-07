@@ -31,7 +31,7 @@ class SiteModuleTests(unittest.TestCase):
         self.assertEqual(ticket.select_one('link[rel=canonical]')['href'],SITE_URL+'/receipt/')
         self.assertFalse(entrance.select('.wp-site-blocks, .store-terminal-header'))
         self.assertEqual([urlsplit(a['href']).path for a in entrance.select('a[href]')],
-                         ['/preview/receipt/','/preview/sys/','/preview/cctv/'])
+                         ['/preview/receipt/','/preview/sys/'])
         self.assertTrue(entrance.select_one('svg[role=img][aria-label]'))
         self.assertFalse(entrance.select('[data-store-stat]'))
         self.assertTrue(ticket.select_one('.wp-site-blocks'))

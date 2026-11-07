@@ -240,6 +240,7 @@ def build(root=ROOT, output=None, base_path=''):
             if el.get('style'):el['style']=rewrite_css(el['style'],base)
         styles=[]
         resources=['store/style.css'] if kind=='home' else ['site-assets/base.css','site-assets/terminal.css' if kind in {'sys','cctv'} else kind+'/style.css']
+        if kind!='home':resources.append('site-assets/links.css')
         for resource in resources:
             path=root/resource;version='?v='+digest(path)[:12]
             styles.append(f'<link rel="stylesheet" href="{base}/{resource}{version}">')

@@ -26,7 +26,7 @@ class BuildTests(unittest.TestCase):
             for name in ('page.html','card.html'):shutil.copyfile(ROOT/board/name,self.root/board/name)
         (self.root/'store').mkdir()
         (self.root/'store/page.html').write_text('<main><h1>{{scene_description}}</h1>{{scene_svg}}<nav>{{scene_controls}}</nav></main>')
-        (self.root/'store/scene.py').write_text('def render():\n    return {"svg": \'<svg role="img" aria-label="A store" viewBox="0 0 100 100"><rect width="100" height="100"/></svg>\', "controls": \'<a href="/receipt/">Receipt</a><a href="/sys/">SYS</a><a href="/cctv/">CCTV</a>\', "description": "A night store"}\n')
+        (self.root/'store/scene.py').write_text('def render():\n    return {"svg": \'<svg role="img" aria-label="A store" viewBox="0 0 100 100"><rect width="100" height="100"/></svg>\', "controls": \'<a href="/receipt/">Receipt</a><a href="/sys/">SYS</a>\', "description": "A night store"}\n')
         (self.root/'store/style.css').write_text('body { margin:0; }')
         (self.root/'store/visit.js').write_text('document.documentElement.dataset.storeReady = "true";')
         (self.root/'site-data').mkdir();(self.root/'site-data/content.json').write_text(json.dumps({'retained_posts':{},'assets':[]}))

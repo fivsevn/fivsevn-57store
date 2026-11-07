@@ -45,7 +45,7 @@ Source for [57store.fivsevn.com](https://57store.fivsevn.com/), a narrative exte
 
 | Public route | Editable source | Purpose |
 |---|---|---|
-| `/` | `store/page.html`, `store/scene.py` | Standalone store entrance; links to receipt, SYS and CCTV |
+| `/` | `store/page.html`, `store/scene.py` | Standalone store entrance; receipt and SYS, with CCTV inside SYS |
 | `/receipt/` | `receipt/page.html` | Original night-store receipt and its navigation |
 | `/fragment/` | `fragment/page.html` | Independent image page |
 | `/cache/` | `cache/page.html`, `cache/posts.json` | Continuous conversation with an inline access prompt |
@@ -70,7 +70,7 @@ See the [store scene guide](store/README.md) for its layout, code-drawn fixtures
 
 SYS saves the exact upload commit instant in Asia/Shanghai. A durable `.publishing/sys.json` ledger tracks source commits and package identities; retries preserve later title, body and visibility edits. Merge commits do not duplicate uploads already introduced by their parents. Empty bodies, deletions and configuration-only changes do not create logs.
 
-CCTV follows the channel's complete public uploads playlist, including continuation pages, and verifies exact publication instants. Each video ID appears once; time and ordering come from YouTube. Future discovery checks all saved records, including hidden ones, so hiding a room cannot cause it to be imported again. A saved room's edited title and notes are independent of later discovery. Video files are played through YouTube embeds. SYS and CCTV own their `page.html` and `card.html`, and share `templates/terminal-header.html` and `site-assets/terminal.css`, preserving the original compact WordPress interior and centered frame. A plain green `SESSION: [ EXIT ]` returns to the entrance. Pagination follows Fieldlog's compact numbers and « / » arrows inside the frame; arrows move to the immediately previous or next page.
+CCTV follows the channel's complete public uploads playlist, including continuation pages, and verifies exact publication instants. Each video ID appears once; time and ordering come from YouTube. Future discovery checks all saved records, including hidden ones, so hiding a room cannot cause it to be imported again. A saved room's edited title and notes are independent of later discovery. Video files are played through YouTube embeds. SYS and CCTV own their `page.html` and `card.html`, and share `templates/terminal-header.html` and `site-assets/terminal.css`, preserving the original compact WordPress interior and centered frame. A plain green `SESSION: [ EXIT ]` returns to the entrance. Shared `site-assets/links.css` keeps authored text links green without underlines, including hover and visited states. Pagination follows Fieldlog's compact numbers and « / » arrows inside the frame; arrows move to the immediately previous or next page.
 
 Saved SYS/CCTV posts use the shared [site-post profile](https://github.com/fivsevn-agy/fivsevn-spec/blob/main/content/spec-content-site-post-001.md): `module: 57store`, `submodule: sys` or `cctv`, precise `extra.published_at`, and `extra.video_ids` for CCTV. Publication requires both `visibility: public` and a published status. These controls exclude records from website output; the source repository itself is public.
 

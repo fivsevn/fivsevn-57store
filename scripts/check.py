@@ -32,8 +32,8 @@ def check(root=ROOT, output=None, base_path=''):
     if not home.select_one(f'script[src^="{base}/store/visit.js"]'):
         errors.append('Store homepage is missing its local visit controls')
     home_routes={urlsplit(link['href']).path for link in home.select('a[href]') if urlsplit(link['href']).path and not urlsplit(link['href']).scheme and not urlsplit(link['href']).netloc}
-    if home_routes!={base+'/receipt/',base+'/sys/',base+'/cctv/'}:
-        errors.append('Store homepage must link only to receipt, SYS and CCTV')
+    if home_routes!={base+'/receipt/',base+'/sys/'}:
+        errors.append('Store homepage must link only to receipt and SYS')
     for key,unit in [('revisions','entries'),('receipts','receipts')]:
         slots=ticket.select(f'[data-store-stat="{key}"]')
         if len(slots)!=1 or slots[0].get_text(strip=True)!=f'{stats[key]:,} {unit}':

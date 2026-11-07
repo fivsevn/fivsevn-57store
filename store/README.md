@@ -4,7 +4,7 @@ The root route is one self-contained, code-drawn room. There are no downloaded
 sprites, raster textures, scene images, remote fonts, browser 3D engine or
 production JavaScript dependencies.
 
-- `plan.py`: metre-space layout, fixtures, small inspection notes, three routes.
+- `plan.py`: metre-space layout, fixtures, small inspection notes, two routes.
 - `shop.py`, `back.py`: original solid geometry for merchandise, equipment and people.
 - `mesh.py`: fixed eight-colour palette, parallel projection, pixel snapping,
   depth ordering and removal of completely concealed stationary surfaces.
@@ -15,26 +15,28 @@ The upper entrance leads to checkout, baskets, umbrellas and a wall magazine
 rack. Three double-sided rows have continuous public aisles on both sides.
 Cold cases follow the east wall. The rear public aisle reaches the toilet and
 a separate employee door. A service passage connects the one compact staff
-room and the cold room behind the rear-stock drink cabinet. SYS and CCTV are
-internal computers. Walls are cut away for visibility; their floor contacts
-remain in the same three-dimensional coordinate system as the equipment.
+room and the cold room behind the rear-stock drink cabinet. The left-hand
+internal computer opens SYS, whose module selection also opens CCTV. The
+right-hand wall holds three six-door locker banks. Walls are cut away for
+visibility; their floor contacts remain in the same three-dimensional
+coordinate system as the equipment.
 
 Brand lettering and the three slogans are woven into the entrance mat. Other
 floor surfaces contain no explanatory text. Tap objects for a short local note;
-the receipt printer and two internal screens are the only page destinations.
+the receipt printer and the single internal SYS screen are the two page destinations.
 
 ## Motion and access
 
-Eighteen named motion hooks cover the sliding doors, sensor, POS text, receipt
+Seventeen named motion hooks cover the sliding doors, sensor, POS text, receipt
 paper, hot-case lamp, coffee steam, case lights, glass reflections, drink lights,
-camera head, cold-room fan, SYS typing, CCTV scan, kettle steam, and small human
+camera head, cold-room fan, SYS typing, kettle steam, and small human
 movements. Offscreen and hidden-page activity pauses. The operating system's
 reduced-motion preference disables them. A deliberate `?motion=on` preview
 choice enables motion and is remembered locally; `?motion=off` clears it.
 No permanent settings panel or decorative site chrome is added to the room.
 
 Inspection cards support touch, keyboard, Escape and outside-tap dismissal.
-They stay within the current viewport. All three route links work without
+They stay within the current viewport. Both route links work without
 JavaScript. Inspectable controls are revealed only after their handlers exist.
 
 ## Build and browser checks

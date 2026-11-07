@@ -95,16 +95,53 @@ test('Store browser QA',{skip:!preview,timeout:120000},async t=>{
     }
   });
 
-  await t.test('The three physical destinations navigate normally',async t=>{
+  await t.test('Receipt and SYS navigate directly, with CCTV reached inside SYS',async t=>{
     const {context,page,errors}=await open({viewport:{width:375,height:667}});
     t.after(()=>context.close());
-    assert.deepEqual(await page.locator('a.room-control').evaluateAll(anchors=>anchors.map(a=>a.getAttribute('href')).sort()),['/cctv/','/receipt/','/sys/']);
-    for(const destination of ['/receipt/','/sys/','/cctv/']){
+    assert.deepEqual(await page.locator('.room-controls a[href]').evaluateAll(anchors=>anchors.map(a=>a.getAttribute('href')).sort()),['/receipt/','/sys/']);
+    assert.equal(await page.locator('[data-owner="cctv"], .room-control[data-object="cctv"], .room-console').count(),0,'The office has one directly linked computer');
+    for(const destination of ['/receipt/','/sys/']){
       await page.goto(origin+'/',{waitUntil:'networkidle'});
       await Promise.all([page.waitForURL(origin+destination),page.locator(`a.room-control[href="${destination}"]`).click()]);
       assert.ok(await page.locator('body').innerText());
     }
+    await Promise.all([page.waitForURL(origin+'/cctv/'),page.locator('.store-terminal-header .store-module-row[href="/cctv/"]').click()]);
+    assert.equal(await page.locator('body.store-cctv').count(),1,'The existing terminal selector retains CCTV access');
     assert.deepEqual(errors,[]);
+  });
+
+  await t.test('Framed pages keep all text links mint green without underlines',async t=>{
+    const context=await browser.newContext({viewport:{width:375,height:667}});
+    t.after(()=>context.close());
+    await context.route('**/*',route=>route.request().url().startsWith(origin+'/')?route.continue():route.abort());
+    const page=await context.newPage();
+    for(const route of ['/receipt/','/sys/','/cctv/','/cache/','/fragment/']){
+      await page.goto(origin+route,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>[...document.querySelectorAll('link[rel=stylesheet]')].every(link=>link.sheet));
+      const result=await page.evaluate(()=>{
+        const preset=getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--secondary').trim();
+        const anchors=[...document.querySelectorAll('body a[href]')].filter(anchor=>anchor.textContent.trim());
+        const sharedStylesheet=[...document.querySelectorAll('link[rel=stylesheet]')].some(link=>new URL(link.href).pathname==='/site-assets/links.css');
+        return {preset,sharedStylesheet,links:anchors.map(anchor=>({
+          text:anchor.textContent.replace(/\s+/g,' ').trim().slice(0,80),
+          color:getComputedStyle(anchor).color,decoration:getComputedStyle(anchor).textDecorationLine
+        }))};
+      });
+      assert.match(result.preset,/^#[\da-f]{6}$/i,`${route} retains the existing secondary preset`);
+      const expected='rgb('+result.preset.slice(1).match(/../g).map(component=>parseInt(component,16)).join(', ')+')';
+      assert.equal(result.sharedStylesheet,true,`${route} loads the shared text-link stylesheet`);
+      if(route!=='/fragment/')assert.ok(result.links.length,`${route} exercises authored text anchors`);
+      for(const link of result.links){
+        assert.equal(link.color,expected,`${route} ${link.text}: mint green`);
+        assert.equal(link.decoration,'none',`${route} ${link.text}: no underline`);
+      }
+      if(route==='/receipt/'){
+        const returning=page.locator('a.receipt-store-return');await returning.hover();
+        const hovered=await returning.evaluate(anchor=>({color:getComputedStyle(anchor).color,decoration:getComputedStyle(anchor).textDecorationLine}));
+        assert.equal(hovered.color,expected,'Receipt STORE remains mint green while hovered');
+        assert.equal(hovered.decoration,'none','Receipt STORE remains without an underline while hovered');
+      }
+    }
   });
 
   await t.test('Reduced motion respects deliberate opt-in and reset',async t=>{
@@ -162,14 +199,17 @@ test('Store browser QA',{skip:!preview,timeout:120000},async t=>{
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('.motion')).animationPlayState==='running');
   });
 
-  await t.test('The destination links work without JavaScript',async t=>{
+  await t.test('Direct SYS and its CCTV selector work without JavaScript',async t=>{
     const context=await browser.newContext({javaScriptEnabled:false,viewport:{width:375,height:667}});
     t.after(()=>context.close());
     const page=await context.newPage();await page.goto(origin+'/');
     assert.equal(await page.locator('button.room-control:visible').count(),0);
-    for(const destination of ['/receipt/','/sys/','/cctv/']){
+    assert.equal(await page.locator('.room-controls a[href="/cctv/"]').count(),0);
+    for(const destination of ['/receipt/','/sys/']){
       await page.goto(origin+'/');
       await Promise.all([page.waitForURL(origin+destination),page.locator(`a.room-control[href="${destination}"]`).click()]);
     }
+    await Promise.all([page.waitForURL(origin+'/cctv/'),page.locator('.store-terminal-header .store-module-row[href="/cctv/"]').click()]);
+    assert.equal(await page.locator('body.store-cctv').count(),1);
   });
 });

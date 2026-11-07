@@ -1,4 +1,4 @@
-/* Local, touch-first inspections. The three destinations remain normal anchors. */
+/* Local, touch-first inspections. Destinations remain normal anchors. */
 (()=>{
  const room=document.querySelector('.room');if(!room)return;
  const html=document.documentElement,note=room.querySelector('#room-note');

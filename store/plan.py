@@ -141,15 +141,15 @@ def assemble(Scene):
     fan.box(0,0,1.70,.46,.24,.28,'steel');fan.quad([(.04,.245,1.74),(.42,.245,1.74),(.42,.245,1.94),(.04,.245,1.94)],'ink',double=True)
     f=fan.part('fan-blades','fan-spin');f.quad([(.20,.25,1.74),(.26,.25,1.74),(.26,.25,1.94),(.20,.25,1.94)],'paper',double=True)
     f.quad([(.09,.25,1.81),(.37,.25,1.81),(.37,.25,1.87),(.09,.25,1.87)],'paper',double=True)
-    # Only one compact staff room. A straight entrance remains between two desks.
+    # Only one compact staff room. A straight entrance separates the single desk and the locker wall.
     staff=s.model('staff-room',.25,REAR_Y+2.90)
     staff.box(0,0,0,2.13,.12,1.25,'dark');staff.box(3.18,0,0,3.55,.12,1.25,'dark')
     entrance=bare('staff-door',2.42,REAR_Y,'员工门','内部工作区。',(.93,.14))
     entrance.box(0,0,0,.07,.16,1.75,'steel');entrance.box(.87,0,0,.07,.16,1.75,'steel');entrance.box(0,0,1.69,.94,.16,.07,'mid')
     entrance.box(.85,.12,.03,.07,.82,1.59,'dark');entrance.box(.84,.70,.84,.04,.07,.035,'mint')
     place('sys','sys_desk',.43,REAR_Y+3.07,'店务终端','内部系统，等待操作。',(1.65,1.45),rear=True,href='/sys/',target=(1.28,REAR_Y+3.55,1.16,138,140))
-    place('cctv','cctv_desk',4.08,REAR_Y+3.07,'监控电脑','六路摄像头正在记录。',(1.65,1.45),rear=True,href='/cctv/',target=(4.93,REAR_Y+3.55,1.16,138,140))
-    place('lockers','lockers',5.98,REAR_Y+3.06,'员工储物柜','六格独立柜，放制服与私人物品。',(1,.5),rear=True)
+    for index,x in enumerate((4.01,5.00,5.99),1):
+        place(f'lockers-{index}','lockers',x,REAR_Y+3.00,f'员工储物柜 {index:02d}','六格独立柜，放制服与私人物品。',(1,.5),rear=True)
     place('stock','stockrack',.36,REAR_Y+5.72,'后场库存','箱子沿墙码好，通道留空。',(1.4,.55),rear=True,rotation=-90)
     place('cart','cart',1.32,REAR_Y+5.15,'收货推车','等待核对的纸箱。',(.8,.55),rear=True)
     place('utility','utility',6.94,REAR_Y+4.65,'工作水槽','器具清洗与简单备餐。',(.9,.7),rear=True,rotation=90)
