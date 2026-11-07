@@ -267,22 +267,24 @@ def _lockers(m):
     m.box(.025,.025,.06,.95,.42,1.79,'steel')
     m.box(.01,.01,1.85,.98,.48,.045,'mid')
     m.box(.055,.055,.025,.89,.37,.035,'dark')
-    doors=m.part('locker-doors')
     details=m.part('locker-vents-and-hardware')
-    for x in (.045,.515):
-        _front(doors,x,.45,.105,.435,1.71,'mid',outline=True)
-        # Louvres at both top and bottom; tiny light upper edge, dark slit.
-        for z0 in (.20,1.53):
-            for j in range(4):
-                _front(details,x+.087,.453,z0+j*.036,.26,.013,'dark')
-                _front(details,x+.087,.455,z0+j*.036+.013,.26,.006,'paper')
-        # Stamped card window and recessed handle surround a small keyhole.
-        _front(details,x+.135,.457,1.325,.17,.07,'steel',outline=True)
-        _front(details,x+.152,.46,1.342,.136,.037,'paper')
-        _front(details,x+.322,.459,.91,.072,.19,'steel',outline=True)
-        details.box(x+.337,.46,.947,.02,.034,.11,'dark')
-        _front(details,x+.348,.495,.918,.014,.016,'ink')
-        for z in (.32,1.52):details.box(x-.005,.451,z,.023,.025,.10,'paper')
+    # Six personal compartments in the same wall-mounted bank: bags and
+    # folded uniforms fit behind individually vented, lockable doors.
+    for row,z in enumerate((.105,.965)):
+        for col,x in enumerate((.045,.355,.665)):
+            door=m.part(f'locker-door-{row*3+col+1}')
+            _front(door,x,.45,z,.285,.82,'mid',outline=True)
+            for z0 in (z+.075,z+.64):
+                for j in range(3):
+                    _front(details,x+.057,.453,z0+j*.034,.16,.015,'dark')
+                    _front(details,x+.057,.455,z0+j*.034+.015,.16,.008,'paper')
+            _front(details,x+.077,.457,z+.535,.13,.065,'steel',outline=True)
+            _front(details,x+.094,.46,z+.553,.096,.030,'paper')
+            _front(details,x+.215,.459,z+.29,.047,.16,'steel',outline=True)
+            details.box(x+.228,.46,z+.327,.020,.034,.087,'dark')
+            _front(details,x+.237,.495,z+.302,.014,.016,'ink')
+            for height in (.16,.65):
+                details.box(x-.005,.451,z+height,.023,.025,.075,'paper')
 
 
 def _utility(m):
