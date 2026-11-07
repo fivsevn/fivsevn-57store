@@ -9,6 +9,7 @@ import html
 import json
 from pathlib import Path, PurePosixPath
 import re
+import runpy
 import shutil
 import subprocess
 from urllib.parse import quote, urlsplit, urlunsplit
@@ -21,6 +22,7 @@ from head_metadata import compact_text, metadata_head, add_missing_metadata
 SITE_URL = 'https://57store.fivsevn.com'
 DESCRIPTIONS = {
     'home':'五月七日便利店，保存日志、影像与片段的叙事空间。',
+    'receipt':'Receipt · 五月七日便利店的小票与店务记录。',
     'sys':'SYS · 五月七日便利店的系统日志。',
     'cctv':'CCTV · 五月七日便利店的影像记录。',
     'cache':'.cache · 五月七日便利店的连续对话与留存片段。',
@@ -134,13 +136,31 @@ def render_body(post, board):
     return str(soup)
 
 
+def render_store(root):
+    """Fill the store's body fragment with its deterministic local scene."""
+    root=Path(root)
+    renderer=runpy.run_path(str(root/'store/scene.py')).get('render')
+    if not callable(renderer):raise ValueError('Store scene needs a render() function')
+    scene=renderer()
+    if not isinstance(scene,dict) or any(not isinstance(scene.get(key),str) for key in ('svg','controls','description')):
+        raise ValueError('Store render() must return svg, controls and description strings')
+    source=(root/'store/page.html').read_text()
+    for key in ('svg','controls','description'):
+        slot='{{scene_'+key+'}}'
+        if source.count(slot)!=1:raise ValueError('Store page needs one scene slot: '+key)
+        source=source.replace(slot,html.escape(scene[key]) if key=='description' else scene[key])
+    if re.search(r'{{\s*scene_',source):raise ValueError('Unknown store scene slot')
+    return BeautifulSoup(source,'html.parser')
+
+
 def build(root=ROOT, output=None, base_path=''):
     root=Path(root).resolve();out=Path(output) if output else root/'_site'
     if not out.is_absolute():out=root/out
     out=out.resolve();base=base_prefix(base_path)
     if out==root or root.is_relative_to(out):raise ValueError('Unsafe output path')
-    if out.is_relative_to(root) and out.relative_to(root).parts[0] in {'sys','cctv','cache','fragment','toilet','pi5','site-assets','site-data','scripts','templates','schemas','tests','.git'}:
+    if out.is_relative_to(root) and out.relative_to(root).parts[0] in {'store','receipt','sys','cctv','cache','fragment','toilet','pi5','site-assets','site-data','scripts','templates','schemas','tests','.git'}:
         raise ValueError('Output overlaps a source directory')
+    home=render_store(root)
     posts=load_posts(root)
     public={board:[p for p in values if is_published(p['meta'])] for board,values in posts.items()}
     stats={'revisions':store_revisions(root),'receipts':sum(len(values) for values in public.values())}
@@ -170,6 +190,14 @@ def build(root=ROOT, output=None, base_path=''):
                     target.write_text(content)
                 else:shutil.copyfile(path,target)
     copy_runtime(root/'site-assets',out/'site-assets')
+    for module in ('store','receipt','cache','fragment','sys','cctv'):
+        copy_runtime(root/module/'assets',out/module/'assets')
+        for source in sorted((root/module).glob('*')):
+            if source.suffix.lower() not in {'.css','.js'}:continue
+            if source.is_symlink():raise ValueError('Symlink runtime resource: '+str(source))
+            target=out/module/source.name;target.parent.mkdir(parents=True,exist_ok=True)
+            if source.suffix.lower()=='.css' and base:target.write_text(rewrite_css(source.read_text(),base))
+            else:shutil.copyfile(source,target)
     copy_runtime(root/'toilet',out/'toilet')
     copy_runtime(root/'pi5/57store/system/static',out/'pi5/57store/system/static')
     copy_runtime(root/'pi5/57store/data',out/'pi5/57store/data')
@@ -186,14 +214,14 @@ def build(root=ROOT, output=None, base_path=''):
         if '{{terminal_header}}' in source:
             source=source.replace('{{terminal_header}}',(root/'templates/terminal-header.html').read_text())
         page=BeautifulSoup(source,'html.parser')
-        if name in {'templates/sys-page.html','templates/cctv-page.html'}:
-            board=Path(name).name.split('-')[0]
+        if name in {'sys/page.html','cctv/page.html'}:
+            board=Path(name).parent.name
             page.select_one(f'.store-module-select a[href="/{board}/"]')['aria-current']='page'
         return page
     def route(board,number):return '/'+board+'/' if number==1 else f'/{board}/page/{number}/'
     canonical_routes=[]
     def save(route_,kind,body,title,post=None,page_number=1):
-        frame=(root/'templates/frame.html').read_text() if (root/'templates/frame.html').exists() else '<main>{{content}}</main>'
+        frame='{{content}}' if kind=='home' else (root/'templates/frame.html').read_text()
         if frame.count('{{content}}')!=1:raise ValueError('Frame needs one content slot')
         wrapped=BeautifulSoup(frame.replace('{{content}}',str(body)),'html.parser')
         if kind=='cache':
@@ -211,13 +239,16 @@ def build(root=ROOT, output=None, base_path=''):
                 el['srcset']=', '.join(prefixed(p.strip().split()[0],base)+' '+p.strip().split()[-1] for p in el['srcset'].split(','))
             if el.get('style'):el['style']=rewrite_css(el['style'],base)
         styles=[]
-        for name in ('base','terminal' if kind in {'sys','cctv'} else kind):
-            path=root/f'site-assets/{name}.css';version='?v='+digest(path)[:12] if path.exists() else ''
-            styles.append(f'<link rel="stylesheet" href="{base}/site-assets/{name}.css{version}">')
+        resources=['store/style.css'] if kind=='home' else ['site-assets/base.css','site-assets/terminal.css' if kind in {'sys','cctv'} else kind+'/style.css']
+        if kind!='home':resources.append('site-assets/links.css')
+        for resource in resources:
+            path=root/resource;version='?v='+digest(path)[:12]
+            styles.append(f'<link rel="stylesheet" href="{base}/{resource}{version}">')
         script=''
-        if kind=='cache':
-            source=root/'site-assets/cache.js';version='?v='+digest(source)[:12] if source.exists() else ''
-            script=f'<script src="{base}/site-assets/cache.js{version}" defer></script>'
+        if kind in {'home','cache'}:
+            resource='store/visit.js' if kind=='home' else 'cache/reveal.js'
+            source=root/resource;version='?v='+digest(source)[:12]
+            script=f'<script src="{base}/{resource}{version}" defer></script>'
         html_class=' class="store-terminal-root"' if kind in {'sys','cctv'} else ''
         description=DESCRIPTIONS[kind]+(f' 第 {page_number} 页。' if page_number>1 else '')
         cover='site-assets/images/pages/57store/57store20260224f.webp'
@@ -231,7 +262,8 @@ def build(root=ROOT, output=None, base_path=''):
                 image=SITE_URL+quote('/'+kind+'/'+meta['id']+'/'+resource,safe='/')
                 image_alt=meta['extra'].get('alt','') or meta['title']
         metadata=metadata_head(title,description,SITE_URL+quote(route_,safe='/'),site_name='五月七日便利店 · 57store',image=image,image_alt=image_alt,article=post is not None)
-        text=f'<!doctype html><html lang="zh-CN"{html_class}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#131415"><title>{html.escape(title)}</title>'+metadata+''.join(styles)+f'</head><body class="wp-embed-responsive store-{kind}">'+str(wrapped)+script+'</body></html>'
+        body_class='store-home' if kind=='home' else 'wp-embed-responsive store-'+kind
+        text=f'<!doctype html><html lang="zh-CN"{html_class}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#131415"><title>{html.escape(title)}</title>'+metadata+''.join(styles)+f'</head><body class="{body_class}">'+str(wrapped)+script+'</body></html>'
         target=out/route_.strip('/')/'index.html';target.parent.mkdir(parents=True,exist_ok=True);target.write_text(text)
         canonical_routes.append(route_)
     def paginate(page,board,number,total):
@@ -251,7 +283,7 @@ def build(root=ROOT, output=None, base_path=''):
             nav.append(el)
         if number<total:nav.append(link(number+1,'»','wp-block-query-pagination-next pager-arrow','下一页','next'))
     def card(board,post,detail=False):
-        page=template(f'templates/{board}-card.html');item=page.li;ident=post['meta']['id'];item['id']=ident
+        page=template(f'{board}/card.html');item=page.li;ident=post['meta']['id'];item['id']=ident
         time=page.select_one('time');time['datetime']=post['meta']['extra']['published_at'];time.string=post['datetime'].strftime('%Y-%m-%d %H:%M')
         if not detail:
             anchor=page.new_tag('a',attrs={'href':f'/{board}/{ident}/','class':'store-entry-link','style':'color:inherit;text-decoration:none','aria-label':'Open '+board.upper()+' '+time.get_text()})
@@ -269,11 +301,11 @@ def build(root=ROOT, output=None, base_path=''):
         total=max(1,(len(values)+SIZES[board]-1)//SIZES[board]);pages[board]=total
         orders[board]=[p['meta']['id'] for p in values]
         for n in range(1,total+1):
-            page=template(f'templates/{board}-page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear()
+            page=template(f'{board}/page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear()
             for post in values[(n-1)*SIZES[board]:n*SIZES[board]]:listing.append(card(board,post))
             paginate(page,board,n,total);save(route(board,n),board,page,'57store / '+board,page_number=n)
         for index,post in enumerate(values):
-            page=template(f'templates/{board}-page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear();listing.append(card(board,post,True))
+            page=template(f'{board}/page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear();listing.append(card(board,post,True))
             page.select_one('.wp-block-query-pagination').decompose()
             back=page.new_tag('p',attrs={'class':'store-return','style':'font-size:10px'});a=page.new_tag('a',attrs={'href':route(board,index//SIZES[board]+1)+'#'+post['meta']['id']});a.string='◁ '+board;back.append(a)
             page.select_one('.wp-block-query').insert_before(back)
@@ -281,7 +313,7 @@ def build(root=ROOT, output=None, base_path=''):
     pages['cache']=1
     page=template('cache/page.html');listing=page.select_one('ul.wp-block-post-template');listing.clear()
     for post in cache:
-        item=template('templates/cache-card.html').li;item['id']='cache-'+datetime.fromisoformat(post['published_at']).strftime('%Y%m%d-%H%M%S')
+        item=template('cache/card.html').li;item['id']='cache-'+datetime.fromisoformat(post['published_at']).strftime('%Y%m%d-%H%M%S')
         time=item.select_one('time')
         if post.get('reveal'):
             time.parent.decompose();item['class']=item.get('class',[])+['store-reveal']
@@ -303,12 +335,13 @@ def build(root=ROOT, output=None, base_path=''):
     destination=base+'/cache/#'+('cache-'+datetime.fromisoformat(cache[-1]['published_at']).strftime('%Y%m%d-%H%M%S') if cache else '')
     legacy_metadata=metadata_head('.cache',DESCRIPTIONS['cache'],SITE_URL+'/cache/',site_name='五月七日便利店 · 57store')
     legacy.write_text('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url='+html.escape(destination,quote=True)+'">'+legacy_metadata+'<title>.cache</title></head><body><a href="'+html.escape(destination,quote=True)+'">.cache</a></body></html>')
-    home=template('templates/home.html')
+    receipt=template('receipt/page.html')
     for key,unit in [('revisions','entries'),('receipts','receipts')]:
-        slots=home.select(f'[data-store-stat="{key}"]')
-        if len(slots)!=1:raise ValueError('Homepage needs one statistic slot: '+key)
+        slots=receipt.select(f'[data-store-stat="{key}"]')
+        if len(slots)!=1:raise ValueError('Receipt needs one statistic slot: '+key)
         slots[0].string=f'{stats[key]:,} {unit}'
-    save('/','home',home,'57store.fivsevn')
+    save('/receipt/','receipt',receipt,'57store / receipt')
+    save('/','home',home,'五月七日便利店 · 57store')
     save('/fragment/','fragment',template('fragment/page.html'),'57store / fragment')
     # Retained experiments keep their original body and scripts; enrich only their head.
     for retained in sorted(out.rglob('*.html')):

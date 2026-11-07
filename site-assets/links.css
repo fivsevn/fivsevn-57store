@@ -1,0 +1,4 @@
+/* Remove link underlines without overriding any module's authored colors. */
+body:is(.store-receipt,.store-sys,.store-cctv,.store-cache,.store-fragment) a:any-link{
+  text-decoration:none!important;
+}
