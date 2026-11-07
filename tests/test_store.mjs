@@ -44,6 +44,25 @@ test('Store browser QA',{skip:!preview,timeout:120000},async t=>{
       t.after(()=>context.close());
       assert.equal(await page.locator('h1').innerText(),'57STORE ゴナナストア');
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'No horizontal overflow');
+      const scrolling=await page.evaluate(()=>({
+        scrollbar:getComputedStyle(document.documentElement).scrollbarWidth,
+        webkit:CSS.supports('selector(::-webkit-scrollbar)'),
+        webkitDisplay:getComputedStyle(document.documentElement,'::-webkit-scrollbar').display,
+        vertical:document.documentElement.scrollHeight>innerHeight
+      }));
+      assert.equal(scrolling.scrollbar,'none','The document scrollbar stays hidden');
+      if(scrolling.webkit)assert.equal(scrolling.webkitDisplay,'none','The WebKit scrollbar also stays hidden');
+      await page.mouse.move(width/2,height/2);
+      await page.mouse.wheel(500,0);await page.waitForTimeout(80);
+      assert.equal(await page.evaluate(()=>scrollX),0,'Horizontal wheel input cannot move the page sideways');
+      if(scrolling.vertical){
+        await page.mouse.wheel(0,240);
+        await page.waitForFunction(()=>scrollY>0,null,{timeout:3000});
+        assert.equal(await page.evaluate(()=>scrollX),0,'Vertical wheel input only moves the page vertically');
+        await page.waitForTimeout(100);
+        await page.evaluate(()=>scrollTo(0,0));
+        await page.waitForFunction(()=>scrollY===0);
+      }
       const notes=page.locator('button.room-control');
       assert.ok(await notes.count()>20,'The physical room retains inspectable objects');
       for(const button of await notes.all()){
@@ -105,41 +124,74 @@ test('Store browser QA',{skip:!preview,timeout:120000},async t=>{
       await Promise.all([page.waitForURL(origin+destination),page.locator(`a.room-control[href="${destination}"]`).click()]);
       assert.ok(await page.locator('body').innerText());
     }
-    await Promise.all([page.waitForURL(origin+'/cctv/'),page.locator('.store-terminal-header .store-module-row[href="/cctv/"]').click()]);
+    await Promise.all([page.waitForURL(origin+'/cctv/'),page.locator('.store-module-select a[href="/cctv/"]').click()]);
     assert.equal(await page.locator('body.store-cctv').count(),1,'The existing terminal selector retains CCTV access');
     assert.deepEqual(errors,[]);
   });
 
-  await t.test('Framed pages keep all text links mint green without underlines',async t=>{
+  await t.test('Links lose underlines while their individual authored colors remain',async t=>{
     const context=await browser.newContext({viewport:{width:375,height:667}});
     t.after(()=>context.close());
     await context.route('**/*',route=>route.request().url().startsWith(origin+'/')?route.continue():route.abort());
     const page=await context.newPage();
+    const rgb=hex=>'rgb('+hex.slice(1).match(/../g).map(component=>parseInt(component,16)).join(', ')+')';
     for(const route of ['/receipt/','/sys/','/cctv/','/cache/','/fragment/']){
       await page.goto(origin+route,{waitUntil:'domcontentloaded'});
       await page.waitForFunction(()=>[...document.querySelectorAll('link[rel=stylesheet]')].every(link=>link.sheet));
       const result=await page.evaluate(()=>{
-        const preset=getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--secondary').trim();
+        const rootStyle=getComputedStyle(document.documentElement);
+        const secondary=rootStyle.getPropertyValue('--wp--preset--color--secondary').trim();
+        const contrast=rootStyle.getPropertyValue('--wp--preset--color--contrast').trim();
         const anchors=[...document.querySelectorAll('body a[href]')].filter(anchor=>anchor.textContent.trim());
-        const sharedStylesheet=[...document.querySelectorAll('link[rel=stylesheet]')].some(link=>new URL(link.href).pathname==='/site-assets/links.css');
-        return {preset,sharedStylesheet,links:anchors.map(anchor=>({
-          text:anchor.textContent.replace(/\s+/g,' ').trim().slice(0,80),
+        const shared=[...document.querySelectorAll('link[rel=stylesheet]')].filter(link=>new URL(link.href).pathname==='/site-assets/links.css');
+        const links=anchors.map(anchor=>({
+          text:anchor.textContent.replace(/\s+/g,' ').trim().slice(0,80),href:anchor.getAttribute('href'),
           color:getComputedStyle(anchor).color,decoration:getComputedStyle(anchor).textDecorationLine
-        }))};
+        }));
+        shared.forEach(link=>{link.disabled=true});
+        links.forEach((link,index)=>{link.authoredColor=getComputedStyle(anchors[index]).color});
+        shared.forEach(link=>{link.disabled=false});
+        return {secondary,contrast,sharedStylesheet:shared.length===1,links};
       });
-      assert.match(result.preset,/^#[\da-f]{6}$/i,`${route} retains the existing secondary preset`);
-      const expected='rgb('+result.preset.slice(1).match(/../g).map(component=>parseInt(component,16)).join(', ')+')';
+      assert.match(result.secondary,/^#[\da-f]{6}$/i);
+      assert.match(result.contrast,/^#[\da-f]{6}$/i);
       assert.equal(result.sharedStylesheet,true,`${route} loads the shared text-link stylesheet`);
       if(route!=='/fragment/')assert.ok(result.links.length,`${route} exercises authored text anchors`);
       for(const link of result.links){
-        assert.equal(link.color,expected,`${route} ${link.text}: mint green`);
+        assert.equal(link.color,link.authoredColor,`${route} ${link.text}: preserve its authored color`);
         assert.equal(link.decoration,'none',`${route} ${link.text}: no underline`);
       }
+      if(route==='/sys/'||route==='/cctv/'){
+        const dayLinks=result.links.filter(link=>link.text==='DAY SHIFT');
+        assert.equal(dayLinks.length,1,'The original DAY SHIFT link remains');
+        assert.equal(new URL(dayLinks[0].href,origin).hostname,'57dayshift.wordpress.com');
+        assert.equal(dayLinks[0].color,rgb(result.contrast),'DAY SHIFT retains its original gray');
+        assert.equal(await page.locator('.store-session a').evaluate(anchor=>getComputedStyle(anchor).color),rgb(result.secondary),'EXIT retains its existing green');
+        assert.deepEqual(await page.locator('.store-terminal-header .store-module-row').evaluateAll(rows=>rows.map(row=>({tag:row.tagName,linked:row.matches('a')||Boolean(row.querySelector('a'))}))),[{tag:'P',linked:false},{tag:'P',linked:false}]);
+        const day=page.getByRole('link',{name:'DAY SHIFT',exact:true});await day.hover();
+        const hovered=await day.evaluate(anchor=>({color:getComputedStyle(anchor).color,decoration:getComputedStyle(anchor).textDecorationLine}));
+        assert.equal(hovered.color,rgb(result.contrast),'DAY SHIFT keeps its original gray while hovered');
+        assert.equal(hovered.decoration,'none','DAY SHIFT has no underline while hovered');
+      }
       if(route==='/receipt/'){
-        const returning=page.locator('a.receipt-store-return');await returning.hover();
+        const returning=page.locator('a.receipt-store-return');
+        const state=await returning.evaluate(anchor=>{
+          const line=anchor.closest('p'),walker=document.createTreeWalker(line,NodeFilter.SHOW_TEXT),brackets=[];
+          for(let node=walker.nextNode();node;node=walker.nextNode()){
+            const characters=node.textContent.replace(/[^\[\]]/g,'');
+            if(characters)brackets.push({characters,inside:anchor.contains(node),color:getComputedStyle(node.parentElement).color});
+          }
+          return {text:anchor.textContent.trim(),line:line.textContent,brackets,color:getComputedStyle(anchor).color};
+        });
+        assert.equal(state.text,'STORE','Only STORE belongs to the return hyperlink');
+        assert.match(state.line,/\[\s*STORE\s*\]/);
+        assert.equal(state.brackets.map(part=>part.characters).join(''),'[]');
+        assert.ok(state.brackets.every(part=>!part.inside&&part.color==='rgb(255, 255, 255)'),'Both white brackets remain outside the link');
+        assert.equal(state.color,rgb(result.secondary),'STORE keeps its existing green');
+        await returning.hover();
         const hovered=await returning.evaluate(anchor=>({color:getComputedStyle(anchor).color,decoration:getComputedStyle(anchor).textDecorationLine}));
-        assert.equal(hovered.color,expected,'Receipt STORE remains mint green while hovered');
-        assert.equal(hovered.decoration,'none','Receipt STORE remains without an underline while hovered');
+        assert.equal(hovered.color,rgb(result.secondary),'STORE remains green while hovered');
+        assert.equal(hovered.decoration,'none','STORE remains without an underline while hovered');
       }
     }
   });
@@ -209,7 +261,7 @@ test('Store browser QA',{skip:!preview,timeout:120000},async t=>{
       await page.goto(origin+'/');
       await Promise.all([page.waitForURL(origin+destination),page.locator(`a.room-control[href="${destination}"]`).click()]);
     }
-    await Promise.all([page.waitForURL(origin+'/cctv/'),page.locator('.store-terminal-header .store-module-row[href="/cctv/"]').click()]);
+    await Promise.all([page.waitForURL(origin+'/cctv/'),page.locator('.store-module-select a[href="/cctv/"]').click()]);
     assert.equal(await page.locator('body.store-cctv').count(),1);
   });
 });

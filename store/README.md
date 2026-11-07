@@ -17,7 +17,7 @@ Cold cases follow the east wall. The rear public aisle reaches the toilet and
 a separate employee door. A service passage connects the one compact staff
 room and the cold room behind the rear-stock drink cabinet. The left-hand
 internal computer opens SYS, whose module selection also opens CCTV. The
-right-hand wall holds three six-door locker banks. Walls are cut away for
+right-hand wall holds a continuous row of nine full-height employee lockers. Walls are cut away for
 visibility; their floor contacts remain in the same three-dimensional
 coordinate system as the equipment.
 
@@ -35,7 +35,9 @@ reduced-motion preference disables them. A deliberate `?motion=on` preview
 choice enables motion and is remembered locally; `?motion=off` clears it.
 No permanent settings panel or decorative site chrome is added to the room.
 
-Inspection cards support touch, keyboard, Escape and outside-tap dismissal.
+The portrait room scrolls vertically, with horizontal overflow clipped and
+scrollbars hidden. Inspection cards support touch, keyboard, Escape and
+outside-tap dismissal.
 They stay within the current viewport. Both route links work without
 JavaScript. Inspectable controls are revealed only after their handlers exist.
 

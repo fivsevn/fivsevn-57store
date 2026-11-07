@@ -33,7 +33,7 @@
   note.style.left=x+'px';note.style.top=y+'px';
  };
  const feedback=control=>{
-  clearTimeout(noticeTimer);usedParts.forEach(p=>p.classList.remove('used'));const parts=artFor(control),screens=parts.filter(p=>p.matches('.sys-type,.cctv-scan,.display-scroll'));usedParts=screens.length?screens:parts;
+  clearTimeout(noticeTimer);usedParts.forEach(p=>p.classList.remove('used'));const parts=artFor(control),screens=parts.filter(p=>p.matches('.sys-type,.display-scroll'));usedParts=screens.length?screens:parts;
   if(!usedParts.length)return;void usedParts[0].getBoundingClientRect();usedParts.forEach(p=>p.classList.add('used'));
   noticeTimer=setTimeout(()=>{usedParts.forEach(p=>p.classList.remove('used'));usedParts=[]},320);
  };

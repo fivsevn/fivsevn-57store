@@ -149,7 +149,7 @@ def assemble(Scene):
     entrance.box(.85,.12,.03,.07,.82,1.59,'dark');entrance.box(.84,.70,.84,.04,.07,.035,'mint')
     place('sys','sys_desk',.43,REAR_Y+3.07,'店务终端','内部系统，等待操作。',(1.65,1.45),rear=True,href='/sys/',target=(1.28,REAR_Y+3.55,1.16,138,140))
     for index,x in enumerate((4.01,5.00,5.99),1):
-        place(f'lockers-{index}','lockers',x,REAR_Y+3.00,f'员工储物柜 {index:02d}','六格独立柜，放制服与私人物品。',(1,.5),rear=True)
+        place(f'lockers-{index}','lockers',x,REAR_Y+3.00,f'员工储物柜 {index:02d}','三格通高独立柜，挂放制服与存放私人物品。',(1,.5),rear=True)
     place('stock','stockrack',.36,REAR_Y+5.72,'后场库存','箱子沿墙码好，通道留空。',(1.4,.55),rear=True,rotation=-90)
     place('cart','cart',1.32,REAR_Y+5.15,'收货推车','等待核对的纸箱。',(.8,.55),rear=True)
     place('utility','utility',6.94,REAR_Y+4.65,'工作水槽','器具清洗与简单备餐。',(.9,.7),rear=True,rotation=90)

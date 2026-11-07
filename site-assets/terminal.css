@@ -50,6 +50,7 @@ html.store-terminal-root { scrollbar-gutter: stable both-edges; }
   gap: var(--wp--style--block-gap);
 }
 .store-module-row {
+  margin: 0;
   flex-wrap: wrap;
   color: var(--wp--preset--color--primary);
   text-decoration: none;
@@ -57,7 +58,6 @@ html.store-terminal-root { scrollbar-gutter: stable both-edges; }
 .store-module-select { flex-wrap: nowrap; color: var(--wp--preset--color--primary); }
 .store-module-select a { color: var(--wp--preset--color--contrast); }
 .store-module-select a[aria-current="page"] { color: var(--wp--preset--color--secondary); }
-.store-module-row:hover { text-decoration: underline; }
 .store-module-nav a:focus-visible,
 .wp-block-query-pagination a:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
 

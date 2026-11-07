@@ -1,5 +1,4 @@
-/* Shared text-link treatment, including legacy WordPress inline link styles. */
+/* Remove link underlines without overriding any module's authored colors. */
 body:is(.store-receipt,.store-sys,.store-cctv,.store-cache,.store-fragment) a:any-link{
-  color:var(--wp--preset--color--secondary,#55efc1)!important;
   text-decoration:none!important;
 }

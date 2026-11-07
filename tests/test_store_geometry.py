@@ -133,7 +133,19 @@ class FullStoreSceneTests(unittest.TestCase):
         self.assertFalse(self.controls.select('[data-object="cctv"]'))
         self.assertEqual(lockers,{'lockers-1','lockers-2','lockers-3'})
         for owner in lockers:
-            self.assertEqual(sum(bank==owner for bank,_ in locker_doors),6,'Each bank retains six visible compartments')
+            self.assertEqual(sum(bank==owner for bank,_ in locker_doors),3,'Each bank has three full-height lockers')
+        fronts={key:[] for key in locker_doors}
+        for group in self.svg.iter():
+            key=(group.get('data-owner'),group.get('data-piece'))
+            if key not in fronts:continue
+            for element in group.iter():
+                if element.tag.rsplit('}',1)[-1]=='polygon':
+                    fronts[key].extend(tuple(map(float,pair.split(','))) for pair in element.get('points').split())
+        for key,points in fronts.items():
+            self.assertTrue(points,key)
+            xs,ys=zip(*points);width=max(xs)-min(xs);height=max(ys)-min(ys)
+            self.assertGreater(width,0,key)
+            self.assertGreater(height/width,3,f'{key} must be one tall door, without stacked compartments')
 
 
 if __name__=='__main__':unittest.main()

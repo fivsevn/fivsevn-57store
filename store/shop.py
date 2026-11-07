@@ -17,7 +17,6 @@ FOOTPRINTS = {
     'gondola_snacks': (1.05, 3.0, 1.45),
     'gondola_noodles': (1.05, 3.0, 1.45),
     'gondola_bread': (1.05, 3.0, 1.45),
-    'gondola_daily': (1.05, 3.0, 1.45),
     'fresh_case': (.75, 2.7, 1.9),
     'bento_case': (.75, 2.7, 1.9),
     'dairy_case': (.75, 2.7, 1.9),
@@ -360,20 +359,6 @@ def _gondola(m,kind):
                     _loaf(m,x-.01,yy,z+.057,.29,.28,.14+(j%2)*.025)
                     if level==0 or j%3==1:
                         _loaf(m,x+.045,yy+.025,z+.21,.20,.22,.09)
-            else:
-                for j in range(8):
-                    yy=.14+j*.34
-                    if j<3:
-                        # Tissue packs have a pulled sheet instead of logo squares.
-                        m.box(x,yy,z+.057,.27,.25,.18,'paper',top='white')
-                        m.box(x+.07,yy+.08,z+.238,.12,.09,.015,'dark')
-                        m.quad([(x+.10,yy+.10,z+.25),(x+.17,yy+.10,z+.25),
-                                (x+.19,yy+.15,z+.30),(x+.12,yy+.16,z+.29)],'paper',double=True)
-                    elif j<6:
-                        _bottle(m,x+.135,yy+.13,z+.057,.065,.30,'mid','paper')
-                        if level!=2: _bottle(m,x+.29,yy+.13,z+.057,.052,.26,'paper','steel')
-                    else:
-                        _bag(m,x,yy,z+.057,.27,.22,.27,'steel',3 if level==1 else 1)
     # End rails stop bags slipping into the aisle without forming solid walls.
     for y in (.075,2.905):
         m.box(.045,y,.17,.95,.022,.035,'mid')

@@ -8,7 +8,7 @@ from math import sin, cos, pi
 
 
 FOOTPRINTS = {
-    'sys_desk': (1.65, 1.45, 1.38), 'cctv_desk': (1.65, 1.45, 1.38),
+    'sys_desk': (1.65, 1.45, 1.38),
     'toilet': (.8, 1.1, 1.05), 'wall_basin': (.65, .5, 1.1),
     'stockrack': (1.4, .55, 1.75), 'lockers': (1., .5, 1.9),
     'utility': (.9, .7, 1.15), 'tea_counter': (1.1, .55, 1.5),
@@ -101,7 +101,7 @@ def _drawer(m,x,y,z,w,h):
     m.box(x+w*.35,y+.006,z+h*.69,w*.3,.026,.018,'dark')
 
 
-def _crt(m,x,y,z,w=.64,depth=.43,h=.46,cctv=False):
+def _crt(m,x,y,z,w=.64,depth=.43,h=.46):
     m=m.part('crt-housing')
     # Deep tube housing narrows toward the rear, unlike a flat display.
     front=y+depth
@@ -124,27 +124,14 @@ def _crt(m,x,y,z,w=.64,depth=.43,h=.46,cctv=False):
     for k in range(5):
         m.quad([(x+w-.067,y+.05+k*.044,z+.15),(x+w-.035,y+.08+k*.044,z+.15),
                 (x+w-.035,y+.08+k*.044,z+.29),(x+w-.067,y+.05+k*.044,z+.29)],'dark',double=True)
-    if cctv:
-        # Four actual camera fields, each with ground line and tiny object.
-        for row in range(2):
-            for col in range(2):
-                sx=x+.078+col*(w-.15)/2; sz=z+.103+row*(h-.16)/2
-                sw=(w-.18)/2; sh=(h-.19)/2
-                _front(details,sx,front+.011,sz,sw,sh,'steel')
-                _front(details,sx+.015,front+.012,sz+.023,sw-.03,.012,'mid')
-                _front(details,sx+sw*.59,front+.013,sz+.045,.025,sh*.45,'dark')
-                _front(details,sx+.014,front+.013,sz+sh-.027,.038,.009,'paper')
-        scan=m.part('cctv-scan-line','cctv-scan')
-        _front(scan,x+.077,front+.015,z+.25,w-.154,.009,'paper',opacity=.5)
-    else:
-        terminal=m.part('system-lines','sys-type')
-        for j,width in enumerate((.36,.26,.32,.17)):
-            _front(terminal,x+.087,front+.011,z+h-.13-j*.043,min(width,w-.19),.025,'mint')
-        cursor=m.part('system-cursor','sys-type')
-        _front(cursor,x+.27,front+.014,z+.139,.032,.012,'mint')
+    terminal=m.part('system-lines','sys-type')
+    for j,width in enumerate((.36,.26,.32,.17)):
+        _front(terminal,x+.087,front+.011,z+h-.13-j*.043,min(width,w-.19),.025,'mint')
+    cursor=m.part('system-cursor','sys-type')
+    _front(cursor,x+.27,front+.014,z+.139,.032,.012,'mint')
 
 
-def _desk(m,cctv=False):
+def _desk(m):
     m.box(.025,0,.735,1.6,.73,.055,'steel',top='mid')
     m.box(.045,.02,.665,1.56,.045,.07,'dark')
     # Left pedestal has three operable drawer fronts; right side is open.
@@ -166,7 +153,7 @@ def _desk(m,cctv=False):
     # Swivel base and neck hold the heavy tube clear of the tabletop.
     m.cylinder(.865,.305,.793,.19,.035,'steel',sides=12)
     m.box(.79,.235,.828,.15,.14,.085,'mid')
-    _crt(m,.545,.055,.906,cctv=cctv)
+    _crt(m,.545,.055,.906)
     # Keyboard has a raised rear edge, separate keys, and a space bar.
     m.box(.565,.545,.793,.58,.16,.025,'paper')
     keys=m.part('keyboard-keys')
@@ -268,23 +255,21 @@ def _lockers(m):
     m.box(.01,.01,1.85,.98,.48,.045,'mid')
     m.box(.055,.055,.025,.89,.37,.035,'dark')
     details=m.part('locker-vents-and-hardware')
-    # Six personal compartments in the same wall-mounted bank: bags and
-    # folded uniforms fit behind individually vented, lockable doors.
-    for row,z in enumerate((.105,.965)):
-        for col,x in enumerate((.045,.355,.665)):
-            door=m.part(f'locker-door-{row*3+col+1}')
-            _front(door,x,.45,z,.285,.82,'mid',outline=True)
-            for z0 in (z+.075,z+.64):
-                for j in range(3):
-                    _front(details,x+.057,.453,z0+j*.034,.16,.015,'dark')
-                    _front(details,x+.057,.455,z0+j*.034+.015,.16,.008,'paper')
-            _front(details,x+.077,.457,z+.535,.13,.065,'steel',outline=True)
-            _front(details,x+.094,.46,z+.553,.096,.030,'paper')
-            _front(details,x+.215,.459,z+.29,.047,.16,'steel',outline=True)
-            details.box(x+.228,.46,z+.327,.020,.034,.087,'dark')
-            _front(details,x+.237,.495,z+.302,.014,.016,'ink')
-            for height in (.16,.65):
-                details.box(x-.005,.451,z+height,.023,.025,.075,'paper')
+    # Each employee gets one uninterrupted full-height locker door.
+    for col,x in enumerate((.045,.355,.665),1):
+        door=m.part(f'locker-door-{col}')
+        _front(door,x,.45,.105,.285,1.71,'mid',outline=True)
+        for z0 in (.20,1.53):
+            for j in range(3):
+                _front(details,x+.057,.453,z0+j*.034,.16,.015,'dark')
+                _front(details,x+.057,.455,z0+j*.034+.015,.16,.008,'paper')
+        _front(details,x+.077,.457,1.325,.13,.065,'steel',outline=True)
+        _front(details,x+.094,.46,1.343,.096,.030,'paper')
+        _front(details,x+.215,.459,.91,.047,.19,'steel',outline=True)
+        details.box(x+.228,.46,.947,.020,.034,.11,'dark')
+        _front(details,x+.237,.495,.922,.014,.016,'ink')
+        for z in (.32,1.52):
+            details.box(x-.005,.451,z,.023,.025,.10,'paper')
 
 
 def _utility(m):
@@ -492,7 +477,7 @@ def build(model,kind,coat='steel'):
     A clerk may pass coat='mint'; the default night operator is muted steel.
     Only the small named pieces have motion hooks, not whole furniture.
     """
-    if kind in ('sys_desk','cctv_desk'):_desk(model,kind=='cctv_desk')
+    if kind == 'sys_desk':_desk(model)
     elif kind == 'human':_human(model,coat)
     else:
         builders={'toilet':_toilet,'wall_basin':_basin,'stockrack':_stockrack,

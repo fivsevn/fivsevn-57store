@@ -100,7 +100,8 @@ class BuildTests(unittest.TestCase):
                     self.assertIn('BOOT SEQUENCE INIT',header.get_text())
                     self.assertIn('SYSTEM ONLINE',header.get_text())
                     rows=header.select('.store-module-row')
-                    self.assertEqual([row['href'] for row in rows],['/preview/sys/','/preview/cctv/'])
+                    self.assertEqual([row.name for row in rows],['p','p'])
+                    self.assertFalse(any(row.has_attr('href') or row.select('a') for row in rows))
                     self.assertEqual([row.get_text(' ',strip=True) for row in rows],[
                         '(1) TERMINAL.LOG … operator log / expiry',
                         '(2) CCTV.MONITOR … camera index / event stream',
