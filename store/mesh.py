@@ -7,7 +7,7 @@ import heapq
 
 PALETTE={'ink':'#090b0c','floor':'#131415','dark':'#252a2d','steel':'#4c595e','mid':'#8a999a','paper':'#c6d0ca','white':'#edf1e7','mint':'#55efc1'}
 RAMP=['ink','floor','dark','steel','mid','paper','white']
-PP=78; WIDTH=672; HEIGHT=1940
+PP=78; WIDTH=672; HEIGHT=1788
 VIEW=(-.025,1,.97/.79)
 
 def project(p):

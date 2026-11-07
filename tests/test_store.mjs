@@ -84,7 +84,7 @@ test('Store browser QA',{skip:!preview,timeout:120000},async t=>{
     t.after(()=>context.close());
     // Native artwork points on the visible hot-case glass and cold-case goods.
     // These taps used to miss a target restricted to the fixture's middle.
-    for(const [x,y,title] of [[110,195,'热食柜'],[555,470,'乳品冷柜'],[575,685,'乳品冷柜'],[590,1280,'便当冷柜']]){
+    for(const [x,y,title] of [[110,195,'热食柜'],[555,470,'乳品冷柜'],[575,630,'乳品冷柜'],[590,1140,'便当冷柜']]){
       let box=await page.locator('.room').boundingBox();const scale=box.width/672;
       await page.evaluate(y=>scrollTo(0,y-200),y*scale);
       box=await page.locator('.room').boundingBox();

@@ -30,5 +30,5 @@ def render():
         else:
             controls.append(f'<button {common} type="button" data-note-title="{escape(item["label"])}" data-note="{escape(item["note"])}" aria-expanded="false" aria-controls="room-note" hidden><span class="sr-only">{escape(item["label"])}</span></button>')
     controls.append('<aside id="room-note" class="room-note" role="status" hidden><strong></strong><span></span></aside>')
-    description='57store 夜班便利店。入口在画面上方，收银台邻近门口，四座中央双面货架两侧保留顾客通道，冷柜沿外围布置。后侧公共过道分别进入厕所和员工门；厕所水箱靠墙、门与洗手位错开。饮料柜背后是有独立保温门的补货冷藏间。末端仅有一个紧凑员工区，SYS 与 CCTV 电脑都是内部设备，桌柜靠墙、操作面朝通路。点按物件可看简短说明。'
+    description='57store 夜班便利店。入口在画面上方，收银台邻近门口，三座中央双面货架两侧保留顾客通道，冷柜沿外围布置。后侧公共过道分别进入厕所和员工门；厕所水箱靠墙、门与洗手位错开。饮料柜背后是有独立保温门的补货冷藏间。末端仅有一个紧凑员工区，SYS 与 CCTV 电脑都是内部设备，桌柜靠墙、操作面朝通路。点按物件可看简短说明。'
     return {'svg':scene.svg(),'controls':''.join(controls),'description':description}

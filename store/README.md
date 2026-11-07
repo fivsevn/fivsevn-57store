@@ -12,7 +12,7 @@ production JavaScript dependencies.
 - `page.html`, `style.css`, `visit.js`: standalone page, physical motion and taps.
 
 The upper entrance leads to checkout, baskets, umbrellas and a wall magazine
-rack. Four double-sided rows have continuous public aisles on both sides.
+rack. Three double-sided rows have continuous public aisles on both sides.
 Cold cases follow the east wall. The rear public aisle reaches the toilet and
 a separate employee door. A service passage connects the one compact staff
 room and the cold room behind the rear-stock drink cabinet. SYS and CCTV are
