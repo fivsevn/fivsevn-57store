@@ -39,4 +39,4 @@ metadata_updated: '2026-11-01'
 
 编辑 `page.html`，提交并推送到 `main`，等待 **Build and deploy 57store** 成功。
 
-页面图片保存在 `site-assets/images/`。替换图片时保留原路径；新增图片后同步修改 HTML 中的引用。页面地址为 [fragment](https://57store.fivsevn.com/fragment/)。
+页面图片保存在 `assets/`，样式在 `style.css`。替换图片时保留原路径；新增图片后同步修改 HTML 中的引用。页面地址为 [fragment](https://57store.fivsevn.com/fragment/)。

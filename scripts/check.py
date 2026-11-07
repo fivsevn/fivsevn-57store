@@ -24,10 +24,23 @@ def check(root=ROOT, output=None, base_path=''):
     stats={'revisions':store_revisions(root),'receipts':sum(is_published(p['meta']) for values in posts.values() for p in values)}
     if receipt.get('store_stats')!=stats:errors.append('Store statistics differ from current Git history or public content')
     home=BeautifulSoup((out/'index.html').read_text(),'html.parser')
+    ticket=BeautifulSoup((out/'receipt/index.html').read_text(),'html.parser')
+    if home.select('.wp-site-blocks, .store-terminal-header'):
+        errors.append('Store homepage must use its standalone frame')
+    home_styles=[urlsplit(link['href']).path for link in home.select('link[rel=stylesheet]')]
+    if home_styles!=[base+'/store/style.css']:errors.append('Store homepage must load only its own stylesheet')
+    if not home.select_one(f'script[src^="{base}/store/visit.js"]'):
+        errors.append('Store homepage is missing its local visit controls')
+    home_routes={urlsplit(link['href']).path for link in home.select('a[href]') if urlsplit(link['href']).path and not urlsplit(link['href']).scheme and not urlsplit(link['href']).netloc}
+    if home_routes!={base+'/receipt/',base+'/sys/',base+'/cctv/'}:
+        errors.append('Store homepage must link only to receipt, SYS and CCTV')
     for key,unit in [('revisions','entries'),('receipts','receipts')]:
-        slots=home.select(f'[data-store-stat="{key}"]')
+        slots=ticket.select(f'[data-store-stat="{key}"]')
         if len(slots)!=1 or slots[0].get_text(strip=True)!=f'{stats[key]:,} {unit}':
-            errors.append('Wrong homepage statistic: '+key)
+            errors.append('Wrong receipt statistic: '+key)
+    returning=ticket.select('a.receipt-store-return')
+    if len(returning)!=1 or returning[0].get('href')!=base+'/' or not returning[0].parent.get_text(strip=True).startswith('// store.rs'):
+        errors.append('Receipt root return must stay in its opening store.rs comment')
     for board,retained in manifest.get('retained_posts',{}).items():
         present={p['meta']['id'] for p in posts[board]}
         if not set(retained)<=present:errors.append('Retained archive records are missing: '+board)
@@ -85,6 +98,9 @@ def check(root=ROOT, output=None, base_path=''):
         for number in range(1,count+1):
             rel=board+'/index.html' if number==1 else f'{board}/page/{number}/index.html'
             page=BeautifulSoup((out/rel).read_text(),'html.parser')
+            session=page.select_one('.store-terminal-header .store-session')
+            if not session or session.get_text(' ',strip=True)!='SESSION: [ EXIT ]' or not session.a or session.a.get('href')!=base+'/':
+                errors.append('Terminal session exit is missing: '+rel)
             actual.extend(item.get('id') for item in page.select('ul.wp-block-post-template > li'))
         if actual!=expected:errors.append('Wrong public archive order: '+board)
         if receipt.get('counts',{}).get(board)!=len(public):errors.append('Wrong public post count: '+board)

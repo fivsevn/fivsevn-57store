@@ -76,3 +76,7 @@ html.store-terminal-root { scrollbar-gutter: stable both-edges; }
 .wp-block-query-pagination a { text-decoration: underline; text-underline-offset: 1px; }
 .wp-block-query-pagination .pager-arrow { text-decoration: none; }
 .wp-block-query-pagination a:hover { text-decoration: none; }
+
+/* Root session exit stays in the original terminal text flow. */
+.store-session a, .store-session a:visited, .store-session a:hover { color: var(--wp--preset--color--secondary); text-decoration: none; }
+.store-session a:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
